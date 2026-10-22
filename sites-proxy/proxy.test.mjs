@@ -68,11 +68,11 @@ test("preserves redirects to external sites", async () => {
     fetchImpl: async () =>
       new Response(null, {
         status: 302,
-        headers: { location: "https://github.com/trackdubllc" },
+        headers: { location: "https://github.com/mesalimllc" },
       }),
   });
 
-  assert.equal(response.headers.get("location"), "https://github.com/trackdubllc");
+  assert.equal(response.headers.get("location"), "https://github.com/mesalimllc");
 });
 
 test("keeps paths that begin with // on the upstream origin", async () => {

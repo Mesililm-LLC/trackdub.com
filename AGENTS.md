@@ -13,7 +13,7 @@
 
 ## Linear (agents)
 
-Track work in Linear workspace [trackdubllc](https://linear.app/trackdubllc) under project **Marketing Site** (label `repo:web`). Agents must search/create/update Linear issues autonomously as progress is made. Link Figma Design System and Notion Specs on visual work. See public-core `docs/operations/linear-workflow.md` when available.
+Track work in Linear workspace [mesalimllc](https://linear.app/mesalimllc) under project **Marketing Site** (label `repo:web`). Agents must search/create/update Linear issues autonomously as progress is made. Link Figma Design System and Notion Specs on visual work. See public-core `docs/operations/linear-workflow.md` when available.
 
 ## Cursor Cloud specific instructions
 
