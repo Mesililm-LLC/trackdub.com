@@ -50,7 +50,7 @@ Do not bind this Worker to Trackdub or its service subdomains. Company-host `/ap
 
 ## Production cutover
 
-Repository push does not complete the domain migration. Before cutover, restore authenticated Cloudflare access, verify existing plan/quota bounds, and confirm business naming/contact details against official documents and startup-credit applications. Do not infer legal approval from website copy.
+Repository push does not complete the domain migration. Before cutover, obtain access to the active Cloudflare redirect rule, verify existing plan/quota bounds, and confirm business naming/contact details against official documents and startup-credit applications. Do not infer legal approval from website copy.
 
 1. Export current Mesalim forwarding rules, web DNS records, certificate status, and Worker bindings. Preserve mail, verification records, Trackdub service hosts, and all subscriber data. Record the original configuration for rollback.
 2. Deploy an isolated preview with `bun run deploy:company:preview`. Verify all pages and assets, mobile/keyboard navigation, real 404s, redirects, and noindex. This command uploads a public preview; do not run until preview deployment is authorized.
@@ -67,4 +67,4 @@ If the company launch fails, roll back the company deployment to a known healthy
 
 CI builds both apps and checks the company types/tests. Local worker smoke checks cover real HTTP routing, page metadata, noindex, assets, aliases, and unknown/service paths. Unit tests additionally cover host/query normalization and method isolation. A build or mock ASSETS binding does not prove live DNS, certificate issuance, mailbox delivery, startup-program acceptance, or product signup completion.
 
-At implementation time, the Cloudflare connector required reauthentication and Linear tools were unavailable. No authenticated DNS/rule inventory or external issue update was possible. Production deployment and cutover remain pending; the source implementation is reviewable independently.
+At implementation time, the Cloudflare connector required reauthentication and Linear tools were unavailable. Wrangler's existing credential did work: the preview was deployed at [mesalim-company-preview.trackdub.workers.dev](https://mesalim-company-preview.trackdub.workers.dev), and its live HTTP smoke passed. Read-only API preflight confirmed the Mesalim zone is active, apex/www web records are proxied, and no company Worker custom domain is bound. Reading the active redirect ruleset returned HTTP 403. That prevents capturing and reviewing the forwarding configuration safely; production company deployment and cutover remain pending. No external issue update was possible. The preview is public but excluded from indexing.
