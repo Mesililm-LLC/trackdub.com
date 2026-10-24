@@ -33,6 +33,8 @@ describe("published company documents", () => {
       const html = readFileSync(resolve(built, file), "utf8");
       for (const match of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
         const href = new URL(match[1].replaceAll("&amp;", "&"), "https://mesalim.com");
+        // Returning visitors may still have the former bare-root redirect cached.
+        if (href.pathname === "/") expect(href.searchParams.get("home")).toBe("mesalim");
         expect(paths.has(href.pathname) || existsSync(resolve(built, `.${href.pathname}`))).toBe(
           true,
         );

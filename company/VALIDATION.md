@@ -2,6 +2,8 @@
 
 ## Production cutover
 
+After launch, the header wordmark exposed another returning-browser path to the cached bare-root 301. All company-home UI links now use `/?home=mesalim`; the canonical stays `https://mesalim.com/`. The live header logo was clicked and remained on Mesalim with the company homepage rendered. The nine company tests passed with 359 assertions, including a regression check against bare-root UI links; company types, build, and focused lint passed before redeployment.
+
 The previously blocked cutover was completed on October 24, 2026 after the Cloudflare connector was reauthenticated. The original redirect rule and placeholder DNS records were saved locally for rollback. The production company Worker was uploaded, both apex/www custom domains attached, and only the old blanket redirect rule was disabled. Production HTTP smoke passed for all eight pages, assets, exact legacy redirects, and real 404s. The www redirect preserves path/query and Trackdub continues to return 200.
 
 Returning-browser testing reproduced the old root 301 from the browser cache. The company URL with `?from=trackdub` loaded the new homepage correctly; Trackdub's return links therefore use that query while the company's canonical remains `https://mesalim.com/`. Return navigation is enabled by default now that the company host is healthy. Historical pre-cutover limitations below describe the earlier state.

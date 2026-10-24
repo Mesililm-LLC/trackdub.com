@@ -6,7 +6,7 @@ type Page = { path: string; title: string; description: string; element: ReactNo
 
 function Wordmark() {
   return (
-    <a className="wordmark" href="/" aria-label="Mesalim home">
+    <a className="wordmark" href={site.homeHref} aria-label="Mesalim home">
       Mesalim<span aria-hidden="true">.</span>
     </a>
   );
@@ -109,7 +109,7 @@ function Button({
 function Breadcrumb({ label, project = false }: { label: string; project?: boolean }) {
   return (
     <nav className="breadcrumb wrap" aria-label="Breadcrumb">
-      <a href="/">Mesalim</a>
+      <a href={site.homeHref}>Mesalim</a>
       <span aria-hidden="true">/</span>
       {project && (
         <>
@@ -631,7 +631,7 @@ function NotFound() {
         This page is unavailable. Explore the company, find a project, or return to Trackdub.
       </p>
       <div className="actions">
-        <Button href="/">Mesalim home</Button>
+        <Button href={site.homeHref}>Mesalim home</Button>
         <Button href="/open-source" secondary>
           Open source
         </Button>
