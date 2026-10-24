@@ -1,6 +1,7 @@
-// Enable only after mesalim.com serves the company site without a product redirect.
-const companySiteReady = import.meta.env.VITE_MESALIM_SITE_READY === "true";
-const companyOrigin = "https://mesalim.com/";
+// The company site is live. Set false during a rollback to product forwarding.
+const companySiteReady = import.meta.env.VITE_MESALIM_SITE_READY !== "false";
+// Avoid the old root 301 cached by returning browsers during the domain cutover.
+const companyOrigin = "https://mesalim.com/?from=trackdub";
 
 export function CompanyReturnBar() {
   if (!companySiteReady) return null;

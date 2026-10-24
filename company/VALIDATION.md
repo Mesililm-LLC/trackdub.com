@@ -1,5 +1,15 @@
 # Implementation validation
 
+## Production cutover
+
+The previously blocked cutover was completed on October 24, 2026 after the Cloudflare connector was reauthenticated. The original redirect rule and placeholder DNS records were saved locally for rollback. The production company Worker was uploaded, both apex/www custom domains attached, and only the old blanket redirect rule was disabled. Production HTTP smoke passed for all eight pages, assets, exact legacy redirects, and real 404s. The www redirect preserves path/query and Trackdub continues to return 200.
+
+Returning-browser testing reproduced the old root 301 from the browser cache. The company URL with `?from=trackdub` loaded the new homepage correctly; Trackdub's return links therefore use that query while the company's canonical remains `https://mesalim.com/`. Return navigation is enabled by default now that the company host is healthy. Historical pre-cutover limitations below describe the earlier state.
+
+Live follow-up verification passed for company return links on all seven Trackdub marketing routes. The desktop company → product workflow → company journey and mobile pricing → company journey both completed in the browser. Trackdub's existing post-deploy smoke passed for www normalization, public Web Bot Auth discovery, and both allowed development-origin waitlist preflights. All 11 non-web DNS records matched the captured pre-cutover configuration. No test subscriber or email was created.
+
+## Initial implementation and preview
+
 Local validation on October 24, 2026, using Bun 1.4.0 and the existing frozen lockfile:
 
 - Trackdub production build: passed after the shared guide shell changes.
