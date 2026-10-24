@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteShell } from "@/components/site-shell";
 
 const GUIDES = [
   {
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/guides/")({
 
 function GuidesIndex() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <SiteShell>
       <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
         <nav className="mb-10 text-sm">
           <Link to="/" className="text-muted-foreground hover:text-foreground">
@@ -71,6 +72,6 @@ function GuidesIndex() {
           ))}
         </ul>
       </div>
-    </main>
+    </SiteShell>
   );
 }

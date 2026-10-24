@@ -8,6 +8,7 @@ import { PlanCard } from "@/components/plan-card";
 import { SectionHeading } from "@/components/section-heading";
 import { Github } from "lucide-react";
 import trackdubIcon from "@/assets/icon.png";
+import { CompanyAttribution, CompanyReturnBar } from "@/components/company-identity";
 
 const GITHUB_REPO = "https://github.com/mesalimllc/Trackdub";
 
@@ -996,6 +997,7 @@ function Masthead() {
   const [open, setOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background">
+      <CompanyReturnBar />
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between gap-6 px-6 sm:h-[88px] sm:px-10">
         <a
           href="#top"
@@ -1182,6 +1184,7 @@ function Lead() {
       <div className="mx-auto w-full max-w-[1600px] px-6 py-12 sm:px-10 sm:py-9 lg:pb-8 lg:pt-9">
         <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-10 xl:gap-14">
           <div>
+            <CompanyAttribution className="mb-4" />
             <h1 className="font-serif text-5xl leading-[0.98] tracking-tight text-foreground sm:text-6xl lg:text-[68px] xl:text-[76px]">
               Dub videos into other languages without giving up control
               <span className="text-accent">.</span>
@@ -4046,6 +4049,7 @@ function Colophon() {
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
               A desktop workstation for dubbing video. Local-first. Editable at every stage.
             </p>
+            <CompanyAttribution className="mt-3" />
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               Early preview ·{" "}
               <a href="/changelog" className="text-foreground hover:text-accent">

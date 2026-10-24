@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { CompanyAttribution, CompanyReturnBar } from "./company-identity";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 export function TopBar() {
   return (
     <header className="border-b border-border">
+      <CompanyReturnBar />
       <Container className="flex items-center justify-between py-5">
         <Link to="/" className="font-serif text-2xl leading-none text-foreground">
           Trackdub<span className="text-accent">.</span>
@@ -53,6 +55,7 @@ export function FooterMini() {
     <footer className="bg-background">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:px-10">
         <span>© 2026 Trackdub</span>
+        <CompanyAttribution />
         <Link to="/" className="text-foreground hover:text-accent">
           trackdub.com
         </Link>

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteShell } from "@/components/site-shell";
 
 const PUBLISHED = "2026-07-01";
 const MODIFIED = "2026-07-27";
@@ -228,7 +229,7 @@ export const Route = createFileRoute("/guides/ai-dubbing-guide")({
 
 function GuidePage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <SiteShell>
       <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
         <nav className="mb-10 text-sm" aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
@@ -571,7 +572,7 @@ function GuidePage() {
           </section>
         </article>
       </div>
-    </main>
+    </SiteShell>
   );
 }
 

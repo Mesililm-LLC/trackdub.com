@@ -1,0 +1,45 @@
+name: Company site checks
+on:
+  push:
+    branches: [main]
+    paths:
+      [
+        "company/**",
+        "src/components/company-identity.tsx",
+        "src/components/site-shell.tsx",
+        "src/routes/**",
+        "package.json",
+        "bun.lock",
+        ".github/workflows/company-site.yml",
+      ]
+  pull_request:
+    paths:
+      [
+        "company/**",
+        "src/components/company-identity.tsx",
+        "src/components/site-shell.tsx",
+        "src/routes/**",
+        "package.json",
+        "bun.lock",
+        ".github/workflows/company-site.yml",
+      ]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - run: bun install --frozen-lockfile
+      - run: bun run check:company
+      - run: bun run build:company
+      - run: bun run test:company
+      - run: bun run build
+      - run: bun run build:company:preview
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mesalim-company-preview
+          path: company/dist
