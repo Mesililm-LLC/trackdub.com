@@ -7,7 +7,7 @@ type Page = { path: string; title: string; description: string; element: ReactNo
 function Wordmark() {
   return (
     <a className="wordmark" href={site.homeHref} aria-label="Mesalim home">
-      Mesalim<span aria-hidden="true">.</span>
+      <img src="/brand/mesalim-wordmark.svg" alt="" width="2983" height="819" />
     </a>
   );
 }
@@ -719,7 +719,8 @@ export function CompanyDocument({
         <meta name="theme-color" content="#f6eddd" />
         <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
         <link rel="canonical" href={canonical} />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/brand/mesalim-favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/brand/mesalim-touch-icon.png" />
         <link rel="stylesheet" href="/company.css" />
         <link
           rel="preload"

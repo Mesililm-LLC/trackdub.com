@@ -118,14 +118,15 @@ p {
   gap: 30px;
 }
 .wordmark {
-  font: 44px/1 var(--display);
-  letter-spacing: -1.8px;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  flex-shrink: 0;
   min-height: 44px;
 }
-.wordmark span {
-  color: var(--amber);
+.wordmark img {
+  display: block;
+  width: 160px;
+  height: auto;
 }
 .wordmark:hover {
   text-decoration: none;
@@ -956,8 +957,8 @@ h2 {
   .header-inner {
     padding-inline: 24px;
   }
-  .wordmark {
-    font-size: 38px;
+  .wordmark img {
+    width: 138px;
   }
   .hero {
     padding-block: 44px;

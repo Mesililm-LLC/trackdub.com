@@ -1,5 +1,9 @@
 # Implementation validation
 
+## Custom wordmark integration
+
+The reviewed custom-M wordmark is used in the shared header and footer, with the standalone custom M supplying a versioned favicon and touch icon. Company types, production build, focused lint, and all nine tests passed (395 assertions). Local browser checks confirmed both wordmark instances load, remain proportional at desktop and 390px, and introduce no mobile horizontal overflow. Home links retain the cached-redirect workaround.
+
 ## Production cutover
 
 After launch, the header wordmark exposed another returning-browser path to the cached bare-root 301. All company-home UI links now use `/?home=mesalim`; the canonical stays `https://mesalim.com/`. The live header logo was clicked and remained on Mesalim with the company homepage rendered. The nine company tests passed with 359 assertions, including a regression check against bare-root UI links; company types, build, and focused lint passed before redeployment.
