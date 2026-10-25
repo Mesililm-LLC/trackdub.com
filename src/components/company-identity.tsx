@@ -15,7 +15,6 @@ export function CompanyReturnBar() {
         >
           ← Mesalim
         </a>
-        <span className="text-muted-foreground">Company &amp; open source</span>
       </div>
     </div>
   );
