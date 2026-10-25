@@ -61,7 +61,7 @@ describe("published company documents", () => {
     expect(all).toContain("not a Microsoft product");
   });
 
-  test("project pages show repository-backed technical detail and credit use", () => {
+  test("project pages show repository-backed technical detail", () => {
     const pageHtml = (path: string) => {
       const page = pages.find((candidate) => candidate.path === path);
       if (!page) throw new Error(`Missing page: ${path}`);
@@ -85,7 +85,5 @@ describe("published company documents", () => {
     expect(lucidMem).toContain("15 agent hosts");
     expect(lucidMem).toContain("amr coverage");
     expect(lucidMem).toContain("No hosted service");
-
-    expect(pageHtml("/about")).toContain("Credits would accelerate GPU-backed provider");
   });
 });

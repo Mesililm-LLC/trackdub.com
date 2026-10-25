@@ -562,14 +562,6 @@ function About() {
           ))}
         </div>
       </section>
-      <section className="section wrap">
-        <SectionHeading number="02" label="Startup credits" title="Build against real workloads.">
-          Credits would accelerate GPU-backed provider and performance validation for LinML,
-          cross-platform package builds and lifecycle testing for Numan, and model-assisted memory
-          evaluation across lucid-mem’s agent hosts. Trackdub adds video translation and dubbing
-          workflows to the portfolio’s media-processing work.
-        </SectionHeading>
-      </section>
       <section className="contact-strip" id="contact">
         <div className="wrap contact-inner">
           <div>
