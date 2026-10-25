@@ -7,7 +7,7 @@ export const projects = [
     mark: "λ",
     headline: "Run ONNX models on Linux.",
     summary:
-      "Linux-first ONNX Runtime tooling that connects provider discovery, hardware readiness, and diagnosable inference.",
+      "An independent Linux-first inference stack, started to give Trackdub a WinML-like experience on Linux.",
     source: "https://github.com/mesalimllc/LinML",
     docs: "https://github.com/mesalimllc/LinML#readme",
     secondary: "https://github.com/mesalimllc/LinML#readme",
@@ -17,7 +17,7 @@ export const projects = [
     core: "Contracts / policy / provider catalog / runtime adapter",
     status: "Prototype · v0.6.0",
     introduction:
-      "LinML separates shared contracts (`LinML.Contracts`), selection rules (`LinML.Policy`), plugin staging (`LinML.Catalog`), and native ONNX Runtime sessions (`LinML.Runtime.Onnx`). That gives developers a place to inspect device readiness and make provider choices before inference, then examine runtime diagnostics when execution differs from expectation.",
+      "LinML began as a Trackdub engineering need: our take on bringing the WinML developer experience to Linux. It is an independent implementation on ONNX Runtime, not a Microsoft port. The project separates shared contracts (`LinML.Contracts`), selection rules (`LinML.Policy`), plugin staging (`LinML.Catalog`), and native ONNX Runtime sessions (`LinML.Runtime.Onnx`). That gives developers a place to inspect device readiness and make provider choices before inference, then examine runtime diagnostics when execution differs from expectation.",
     capabilities: [
       "List available execution providers and diagnose readiness for the current machine.",
       "Select providers through explicit policies and inspect runtime or fallback diagnostics.",

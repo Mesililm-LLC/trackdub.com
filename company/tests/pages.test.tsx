@@ -69,6 +69,8 @@ describe("published company documents", () => {
     };
 
     const linml = pageHtml("/open-source/linml");
+    expect(linml).toContain("LinML began as a Trackdub engineering need");
+    expect(linml).toContain("not a Microsoft port");
     expect(linml).toContain("LinML.Contracts");
     expect(linml).toContain("SHA-256 integrity checks");
     expect(linml).toContain("Prototype · v0.6.0");
