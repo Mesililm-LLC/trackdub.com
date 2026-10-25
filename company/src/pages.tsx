@@ -383,8 +383,9 @@ function OpenSource() {
           Open the toolbox<span className="period">.</span>
         </h1>
         <p className="lead">
-          Inference, shell tooling, and agent memory, built in the open. Each project keeps its own
-          source, documentation, and community.
+          Linux inference, verifiable Nushell packages, and coding-agent memory. The repositories
+          make the engineering visible, from provider selection and package signing to measured
+          memory quality.
         </p>
       </section>
       <section className="section wrap directory">
@@ -450,8 +451,8 @@ function ProjectDetail({ project }: { project: Project }) {
           <dd>{project.interface}</dd>
         </div>
         <div>
-          <dt>Project</dt>
-          <dd>{project.name}</dd>
+          <dt>Core</dt>
+          <dd>{project.core}</dd>
         </div>
       </dl>
       <section className="section detail-grid wrap">
@@ -491,6 +492,29 @@ function ProjectDetail({ project }: { project: Project }) {
           </div>
         </figure>
       </section>
+      {project.ecosystem.length > 0 && (
+        <section className="section wrap">
+          <SectionHeading
+            number="02"
+            label="Numan distribution"
+            title="Follow a package to install."
+          >
+            Numan’s public repositories separate the client, curated package index, and builds for
+            selected plugins. The registry signs the catalog; the build pipeline does not hold its
+            signing key.
+          </SectionHeading>
+          <div className="source-directory">
+            {project.ecosystem.map((resource) => (
+              <a key={resource.href} href={resource.href}>
+                <span>{resource.name}</span>
+                <span>
+                  {resource.detail} <span aria-hidden="true">↗</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
       <section className="contact-strip">
         <div className="wrap contact-inner">
           <div>
@@ -516,9 +540,9 @@ function About() {
           Meet Mesalim<span className="period">.</span>
         </h1>
         <p className="lead">
-          We build tools for creative work and the systems that make it possible. Trackdub leads the
-          product portfolio, alongside open source projects for inference, shell tooling, and agent
-          memory.
+          Mesalim LLC builds software for creative and developer workflows. Trackdub is our flagship
+          video-dubbing product. Our open source work spans Linux inference, verified package
+          distribution, and memory for coding agents.
         </p>
       </section>
       <section className="section wrap">
@@ -537,6 +561,14 @@ function About() {
             </a>
           ))}
         </div>
+      </section>
+      <section className="section wrap">
+        <SectionHeading number="02" label="Startup credits" title="Build against real workloads.">
+          Credits would accelerate GPU-backed provider and performance validation for LinML,
+          cross-platform package builds and lifecycle testing for Numan, and model-assisted memory
+          evaluation across lucid-mem’s agent hosts. Trackdub adds video translation and dubbing
+          workflows to the portfolio’s media-processing work.
+        </SectionHeading>
       </section>
       <section className="contact-strip" id="contact">
         <div className="wrap contact-inner">
@@ -654,7 +686,7 @@ export const pages: Page[] = [
     path: "/open-source",
     title: "Open source · Mesalim",
     description:
-      "Explore LinML, Numan, and lucid-mem: open source tools for Linux inference, Nushell packages, and Git-backed agent memory.",
+      "Explore Mesalim’s open source engineering: Linux ONNX inference, a signed Nushell package ecosystem, and measured Git-backed memory for coding agents.",
     element: <OpenSource />,
   },
   ...projects.map((project) => ({
@@ -667,7 +699,7 @@ export const pages: Page[] = [
     path: "/about",
     title: "About Mesalim",
     description:
-      "Meet Mesalim, the company behind Trackdub, with an open source portfolio spanning inference, shell tooling, and agent memory.",
+      "Meet Mesalim LLC, the company behind Trackdub and open source engineering in Linux inference, package distribution, and AI agent memory.",
     element: <About />,
   },
   {

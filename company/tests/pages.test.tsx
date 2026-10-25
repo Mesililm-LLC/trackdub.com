@@ -58,6 +58,32 @@ describe("published company documents", () => {
       expect(all).toContain(link);
     expect(all).toContain("Early preview");
     expect(all).toContain("MIT");
-    expect(all).toContain("not an official Microsoft product");
+    expect(all).toContain("not a Microsoft product");
+  });
+
+  test("project pages show repository-backed technical detail and credit use", () => {
+    const pageHtml = (path: string) => {
+      const page = pages.find((candidate) => candidate.path === path);
+      if (!page) throw new Error(`Missing page: ${path}`);
+      return renderToStaticMarkup(page.element);
+    };
+
+    const linml = pageHtml("/open-source/linml");
+    expect(linml).toContain("LinML.Contracts");
+    expect(linml).toContain("SHA-256 integrity checks");
+    expect(linml).toContain("Prototype · v0.6.0");
+
+    const numan = pageHtml("/open-source/numan");
+    expect(numan).toContain("Ed25519 trust root");
+    expect(numan).toContain("https://github.com/numan-cli/numan-registry");
+    expect(numan).toContain("https://github.com/numan-cli/numan-plugins");
+    expect(numan).toContain("build pipeline does not hold its signing key");
+
+    const lucidMem = pageHtml("/open-source/lucid-mem");
+    expect(lucidMem).toContain("15 agent hosts");
+    expect(lucidMem).toContain("amr coverage");
+    expect(lucidMem).toContain("No hosted service");
+
+    expect(pageHtml("/about")).toContain("Credits would accelerate GPU-backed provider");
   });
 });
