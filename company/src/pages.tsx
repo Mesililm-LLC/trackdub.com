@@ -13,7 +13,7 @@ function Wordmark() {
 }
 
 const navigation = [
-  ["Products", "/products/trackdub"],
+  ["Trackdub", "/products/trackdub"],
   ["Open source", "/open-source"],
   ["About", "/about"],
 ] as const;
@@ -178,7 +178,7 @@ function ProductImage({ priority = false }: { priority?: boolean }) {
           </span>
         </div>
       </a>
-      <figcaption>Fig. 01 / Actual early-build interface. Product is in development.</figcaption>
+      <figcaption>Actual early-build interface. Product is in development.</figcaption>
     </figure>
   );
 }
@@ -214,9 +214,6 @@ function Home() {
     <>
       <section className="hero wrap">
         <div className="hero-copy">
-          <p className="eyebrow">
-            <span aria-hidden="true">✳</span> Mesalim / Software company
-          </p>
           <h1>
             Tools for creators and developers<span className="period">.</span>
           </h1>
@@ -313,7 +310,7 @@ function Trackdub() {
       <Breadcrumb label="Trackdub" />
       <section className="hero product-hero wrap">
         <div>
-          <p className="eyebrow">Flagship product / Early preview</p>
+          <p className="eyebrow">Early preview</p>
           <h1>
             Make your videos multilingual<span className="period">.</span>
           </h1>
@@ -382,7 +379,6 @@ function OpenSource() {
     <>
       <Breadcrumb label="Open source" />
       <section className="page-title wrap">
-        <p className="eyebrow">Public source / Practical tools</p>
         <h1>
           Open the toolbox<span className="period">.</span>
         </h1>
@@ -516,7 +512,6 @@ function About() {
     <>
       <Breadcrumb label="About" />
       <section className="page-title about-title wrap">
-        <p className="eyebrow">Mesalim / About the company</p>
         <h1>
           Meet Mesalim<span className="period">.</span>
         </h1>
@@ -571,7 +566,6 @@ function Privacy() {
     <>
       <Breadcrumb label="Privacy" />
       <section className="page-title wrap">
-        <p className="eyebrow">Mesalim / Website privacy</p>
         <h1>
           Understand this website<span className="period">.</span>
         </h1>

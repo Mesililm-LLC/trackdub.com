@@ -3719,8 +3719,7 @@ function Endnote() {
   return (
     <section id="waitlist" data-reveal className="reveal border-b border-border">
       <Container className="py-24 sm:py-36 text-center">
-        <SectionNumber n="10" label="End" />
-        <p className="mx-auto mt-8 max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
+        <p className="mx-auto max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
           Dub this in Spanish. Keep the original music. Regenerate line 42 with slower prosody. Ship
           it before lunch.
         </p>
