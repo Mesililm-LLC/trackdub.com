@@ -80,7 +80,7 @@ function Footer() {
         </nav>
       </div>
       <div className="footer-bottom">
-        <span>© {new Date().getUTCFullYear()} Mesalim</span>
+        <span>© {new Date().getUTCFullYear()} Mesalim LLC</span>
         <a href={site.github}>
           Follow our work on GitHub <span aria-hidden="true">↗</span>
         </a>
