@@ -7,7 +7,7 @@ import { PRICING_PLANS } from "@/lib/pricing";
 import { PlanCard } from "@/components/plan-card";
 import { SectionHeading } from "@/components/section-heading";
 import { Github } from "lucide-react";
-import trackdubIcon from "@/assets/icon.png";
+import trackdubIcon from "@/assets/trackdub-logo.svg";
 import { CompanyAttribution, CompanyReturnBar } from "@/components/company-identity";
 
 const GITHUB_REPO = "https://github.com/mesalimllc/Trackdub";
