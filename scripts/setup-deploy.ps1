@@ -75,7 +75,7 @@ $cfToken    = Read-Secret 'CLOUDFLARE_API_TOKEN (Account: D1:Edit on account 21c
 $cfAccount  = Read-Secret 'CLOUDFLARE_ACCOUNT_ID'
 
 $siteKeyDefault = '0x4AAAAAAD9pNIBkKRhSY098'
-$siteKeyRaw     = Read-Host -Prompt "VITE_TURNSTILE_SITE_KEY (Enter = Cloudflare test key: $siteKeyDefault)"
+$siteKeyRaw     = Read-Host -Prompt "VITE_TURNSTILE_SITE_KEY (Enter = trackdub-waitlist widget: $siteKeyDefault)"
 $siteKey        = if ([string]::IsNullOrWhiteSpace($siteKeyRaw)) { $siteKeyDefault } else { $siteKeyRaw.Trim() }
 
 # Set in process.env so all subsequent wrangler + bun invocations inherit them.
