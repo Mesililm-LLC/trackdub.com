@@ -6,7 +6,6 @@ export function SectionRail() {
   const [visible, setVisible] = useState(false);
   const itemsRef = useRef<Record<string, HTMLAnchorElement | null>>({});
   const listRef = useRef<HTMLDivElement | null>(null);
-  const [hovered, setHovered] = useState<string | null>(null);
   const navIds = useRef(new Set(NAV.map((n) => n.href.slice(1))));
   const activeRef = useRef<string>("");
   const [scrubbing, setScrubbing] = useState(false);
@@ -684,8 +683,6 @@ export function SectionRail() {
         {NAV.map((n, i) => {
           const id = n.href.slice(1);
           const isActive = active === id;
-          const isHovered = hovered === id;
-          const showTip = isHovered;
           return (
             <a
               key={id}
@@ -695,10 +692,6 @@ export function SectionRail() {
               }}
               className="pointer-events-auto group relative flex flex-1 min-h-[32px] cursor-pointer items-center gap-3 rounded-sm px-1 transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:bg-foreground/[0.04]"
               aria-label={`Jump to ${n.label}`}
-              onMouseEnter={() => setHovered(id)}
-              onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
-              onFocus={() => setHovered(id)}
-              onBlur={() => setHovered((h) => (h === id ? null : h))}
               onClick={(e) => {
                 // Swallow the click if the user was scrubbing — pointerup
                 // fires before click, so draggingRef is still true here.
