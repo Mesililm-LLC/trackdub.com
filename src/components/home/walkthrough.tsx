@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { SectionHeading } from "@/components/section-heading";
 import { Container, SectionNumber } from "@/components/home/shared";
 import { ACC, DIM, INK, LINE, PANEL, PANEL_HI, round3 } from "@/components/home/helpers";
@@ -240,7 +240,7 @@ export function Walkthrough() {
   );
 }
 
-function PaneHeader({ children }: { children: React.ReactNode }) {
+function PaneHeader({ children }: { children: ReactNode }) {
   return (
     <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: DIM }}>
       {children}

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Container, SectionNumber } from "@/components/home/shared";
 
 export function Control() {
@@ -50,7 +51,7 @@ function ControlPlate({
 }: {
   tag: string;
   t: string;
-  text: React.ReactNode;
+  text: ReactNode;
   hint: string;
   accent?: boolean;
 }) {

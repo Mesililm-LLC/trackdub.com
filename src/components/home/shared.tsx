@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 export function Container({
   children,
   className = "",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
@@ -34,7 +35,7 @@ export function Rule({ className = "" }: { className?: string }) {
   return <div className={`h-px w-full bg-border ${className}`} aria-hidden />;
 }
 
-export function TextLink({ href, children }: { href: string; children: React.ReactNode }) {
+export function TextLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <a
       href={href}
@@ -51,7 +52,7 @@ export function InkButton({
   variant = "primary",
 }: {
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
   variant?: "primary" | "ghost";
 }) {
   const base =
