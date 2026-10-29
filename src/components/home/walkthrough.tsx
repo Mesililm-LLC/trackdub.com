@@ -82,38 +82,38 @@ export function Walkthrough() {
   const [stale, setStale] = useState<Record<number, Partial<Record<StageId, boolean>>>>({});
   const [regenId, setRegenId] = useState<number | null>(null);
 
-  const markStale = (lineId: number, downstream: StageId[]) => {
+  const markStale = ({ lineId, downstream }: { lineId: number; downstream: StageId[] }) => {
     setStale((prev) => {
       const cur = { ...(prev[lineId] ?? {}) };
       downstream.forEach((s) => (cur[s] = true));
       return { ...prev, [lineId]: cur };
     });
   };
-  const clearStale = (lineId: number, s: StageId) => {
+  const clearStale = ({ lineId, stage }: { lineId: number; stage: StageId }) => {
     setStale((prev) => {
       const cur = { ...(prev[lineId] ?? {}) };
-      delete cur[s];
+      delete cur[stage];
       return { ...prev, [lineId]: cur };
     });
   };
 
-  const editSource = (id: number, source: string) => {
+  const editSource = ({ id, source }: { id: number; source: string }) => {
     setLines((ls) => ls.map((l) => (l.id === id ? { ...l, source } : l)));
-    markStale(id, ["translate", "voice"]);
+    markStale({ lineId: id, downstream: ["translate", "voice"] });
   };
-  const editTarget = (id: number, target: string) => {
+  const editTarget = ({ id, target }: { id: number; target: string }) => {
     setLines((ls) => ls.map((l) => (l.id === id ? { ...l, target } : l)));
-    markStale(id, ["voice"]);
-    clearStale(id, "translate");
+    markStale({ lineId: id, downstream: ["voice"] });
+    clearStale({ lineId: id, stage: "translate" });
   };
-  const reassignSpeaker = (id: number, speakerId: string) => {
+  const reassignSpeaker = ({ id, speakerId }: { id: number; speakerId: string }) => {
     setLines((ls) => ls.map((l) => (l.id === id ? { ...l, speakerId } : l)));
-    markStale(id, ["voice"]);
+    markStale({ lineId: id, downstream: ["voice"] });
   };
-  const renameSpeaker = (sid: string, name: string) => {
-    setSpeakers((ss) => ss.map((s) => (s.id === sid ? { ...s, name } : s)));
+  const renameSpeaker = ({ id, name }: { id: string; name: string }) => {
+    setSpeakers((ss) => ss.map((s) => (s.id === id ? { ...s, name } : s)));
   };
-  const regenerate = (id: number) => {
+  const regenerate = ({ id }: { id: number }) => {
     setRegenId(id);
     window.setTimeout(() => {
       setLines((ls) =>
@@ -121,12 +121,13 @@ export function Walkthrough() {
           l.id === id ? { ...l, pace: Math.round((0.9 + Math.random() * 0.12) * 100) / 100 } : l,
         ),
       );
-      clearStale(id, "voice");
+      clearStale({ lineId: id, stage: "voice" });
       setRegenId(null);
     }, 900);
   };
 
-  const staleCount = (s: StageId) => Object.values(stale).reduce((n, m) => n + (m?.[s] ? 1 : 0), 0);
+  const staleCount = ({ stage }: { stage: StageId }) =>
+    Object.values(stale).reduce((n, m) => n + (m?.[stage] ? 1 : 0), 0);
 
   return (
     <section id="walkthrough" data-reveal className="reveal border-b border-border bg-surface">
@@ -142,7 +143,7 @@ export function Walkthrough() {
             />
             <ul className="mt-8 space-y-2 font-mono text-[12px] text-muted-foreground">
               {STAGE_TABS.map((s) => {
-                const c = staleCount(s.id);
+                const c = staleCount({ stage: s.id });
                 return (
                   <li
                     key={s.id}
@@ -170,7 +171,7 @@ export function Walkthrough() {
               >
                 {STAGE_TABS.map((s) => {
                   const active = stage === s.id;
-                  const c = staleCount(s.id);
+                  const c = staleCount({ stage: s.id });
                   return (
                     <button
                       key={s.id}
@@ -338,7 +339,7 @@ function TranscribePane({
   lines: Line[];
   speakers: Speaker[];
   stale: Record<number, Partial<Record<StageId, boolean>>>;
-  onEdit: (id: number, source: string) => void;
+  onEdit: (edit: { id: number; source: string }) => void;
 }) {
   const spk = (id: string) => speakers.find((s) => s.id === id);
   return (
@@ -366,7 +367,7 @@ function TranscribePane({
               <span>
                 <EditableSpan
                   value={l.source}
-                  onCommit={(v) => onEdit(l.id, v)}
+                  onCommit={(v) => onEdit({ id: l.id, source: v })}
                   ariaLabel={`Edit source line ${l.id}`}
                 />
                 {isStale && <StaleTag label="downstream" />}
@@ -389,7 +390,7 @@ function TranslatePane({
 }: {
   lines: Line[];
   stale: Record<number, Partial<Record<StageId, boolean>>>;
-  onEdit: (id: number, target: string) => void;
+  onEdit: (edit: { id: number; target: string }) => void;
 }) {
   return (
     <div style={{ color: INK }}>
@@ -420,7 +421,7 @@ function TranslatePane({
             <span>
               <EditableSpan
                 value={l.target}
-                onCommit={(v) => onEdit(l.id, v)}
+                onCommit={(v) => onEdit({ id: l.id, target: v })}
                 ariaLabel={`Edit target line ${l.id}`}
                 serif
               />
@@ -446,8 +447,8 @@ function DiarizePane({
 }: {
   lines: Line[];
   speakers: Speaker[];
-  onRename: (id: string, name: string) => void;
-  onReassign: (lineId: number, speakerId: string) => void;
+  onRename: (rename: { id: string; name: string }) => void;
+  onReassign: (reassign: { lineId: number; speakerId: string }) => void;
 }) {
   const count = (sid: string) => lines.filter((l) => l.speakerId === sid).length;
   return (
@@ -464,7 +465,7 @@ function DiarizePane({
               <span className="h-6 w-6 rounded-full" style={{ background: s.color }} />
               <EditableSpan
                 value={s.name}
-                onCommit={(v) => onRename(s.id, v || s.name)}
+                onCommit={(v) => onRename({ id: s.id, name: v || s.name })}
                 ariaLabel={`Rename ${s.name}`}
               />
               <span className="font-mono text-[10px]" style={{ color: DIM }}>
@@ -486,7 +487,7 @@ function DiarizePane({
             </span>
             <select
               value={l.speakerId}
-              onChange={(e) => onReassign(l.id, e.target.value)}
+              onChange={(e) => onReassign({ lineId: l.id, speakerId: e.target.value })}
               aria-label={`Reassign line ${l.id} speaker`}
               className="font-mono text-[11px] outline-none focus:ring-1"
               style={{
@@ -520,58 +521,79 @@ function VoicePane({
   speakers: Speaker[];
   stale: Record<number, Partial<Record<StageId, boolean>>>;
   regenId: number | null;
-  onRegen: (id: number) => void;
+  onRegen: (line: { id: number }) => void;
 }) {
   const spk = (id: string) => speakers.find((s) => s.id === id);
   return (
     <div style={{ color: INK }}>
       <PaneHeader>Voice lines · regenerate one without touching the rest</PaneHeader>
       <div className="space-y-2">
-        {lines.map((l) => {
-          const s = spk(l.speakerId);
-          const isStale = !!stale[l.id]?.voice;
-          const busy = regenId === l.id;
-          return (
-            <div key={l.id} className="border p-3" style={{ borderColor: LINE }}>
-              <div
-                className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]"
-                style={{ color: DIM }}
-              >
-                <span>
-                  Line {l.id} · {l.t} · <span style={{ color: s?.color }}>{s?.name}</span>
-                  {isStale && !busy && <StaleTag label="needs regen" />}
-                  {busy && <StaleTag label="regenerating…" />}
-                </span>
-                <span>{l.duration.toFixed(2)}s</span>
-              </div>
-              <div className="mt-2 font-serif text-[16px] leading-snug">"{l.target}"</div>
-              <div
-                className="mt-3 grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 font-mono text-[11px]"
-                style={{ color: DIM }}
-              >
-                <FakeWaveform
-                  seed={l.id + Math.round(l.pace * 100)}
-                  color={s?.color ?? ACC}
-                  busy={busy}
-                />
-                <span>pace {l.pace.toFixed(2)}×</span>
-                <span>pause {l.pause}ms</span>
-                <button
-                  onClick={() => onRegen(l.id)}
-                  disabled={busy}
-                  className="px-2 py-1 uppercase tracking-[0.14em] transition-colors disabled:opacity-50"
-                  style={{
-                    color: isStale ? ACC : INK,
-                    border: `1px solid ${isStale ? ACC : LINE}`,
-                    background: PANEL_HI,
-                  }}
-                >
-                  {busy ? "…" : "Regen line"}
-                </button>
-              </div>
-            </div>
-          );
-        })}
+        {lines.map((l) => (
+          <VoiceLine
+            key={l.id}
+            line={l}
+            speaker={spk(l.speakerId)}
+            stale={!!stale[l.id]?.voice}
+            busy={regenId === l.id}
+            onRegen={onRegen}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function VoiceLine({
+  line,
+  speaker,
+  stale,
+  busy,
+  onRegen,
+}: {
+  line: Line;
+  speaker: Speaker | undefined;
+  stale: boolean;
+  busy: boolean;
+  onRegen: (line: { id: number }) => void;
+}) {
+  return (
+    <div className="border p-3" style={{ borderColor: LINE }}>
+      <div
+        className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ color: DIM }}
+      >
+        <span>
+          Line {line.id} · {line.t} ·{" "}
+          <span style={{ color: speaker?.color }}>{speaker?.name}</span>
+          {stale && !busy && <StaleTag label="needs regen" />}
+          {busy && <StaleTag label="regenerating…" />}
+        </span>
+        <span>{line.duration.toFixed(2)}s</span>
+      </div>
+      <div className="mt-2 font-serif text-[16px] leading-snug">"{line.target}"</div>
+      <div
+        className="mt-3 grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 font-mono text-[11px]"
+        style={{ color: DIM }}
+      >
+        <FakeWaveform
+          seed={line.id + Math.round(line.pace * 100)}
+          color={speaker?.color ?? ACC}
+          busy={busy}
+        />
+        <span>pace {line.pace.toFixed(2)}×</span>
+        <span>pause {line.pause}ms</span>
+        <button
+          onClick={() => onRegen({ id: line.id })}
+          disabled={busy}
+          className="px-2 py-1 uppercase tracking-[0.14em] transition-colors disabled:opacity-50"
+          style={{
+            color: stale ? ACC : INK,
+            border: `1px solid ${stale ? ACC : LINE}`,
+            background: PANEL_HI,
+          }}
+        >
+          {busy ? "…" : "Regen line"}
+        </button>
       </div>
     </div>
   );

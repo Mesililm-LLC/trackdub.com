@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -31,13 +31,179 @@ declare global {
 
 const WAITLIST_INTERESTS = new Set(["personal", "pro", "studio"]);
 
+type FormStatus = "idle" | "loading" | "done";
+type VerificationState = "required" | "ready" | "error";
+type WaitlistResponse = { ok: boolean; error?: string } | null;
+type SubmitResult = { ok: true } | { ok: false; status: number; error?: string };
+
+// trackdub.dev (ChatGPT Sites) has no D1/Turnstile bindings of its own,
+// so it posts cross-origin to the canonical API on trackdub.com instead
+// of relying on its own (nonexistent) server env. Every other host
+// (localhost, Workers preview URLs, QA) keeps the relative endpoint —
+// the production preflight only allow-lists trackdub.dev origins, so
+// routing them to the absolute URL would just fail CORS.
+function resolveApiBase(): string {
+  if (typeof window === "undefined") return "";
+  const { hostname } = window.location;
+  if (hostname === "trackdub.dev") return "https://trackdub.com";
+  if (hostname === "www.trackdub.dev") return "https://trackdub.com";
+  return "";
+}
+
+function reportSubmitFailure(result: SubmitResult, onExpired: () => void) {
+  if (result.ok) return;
+  if (result.status === 0) {
+    toast.error("Could not reach the server. Try again in a moment.");
+    return;
+  }
+  if (result.status === 403) {
+    onExpired();
+    toast.error("Verification expired. Please complete it again.");
+    return;
+  }
+  toast.error(result.error || "Could not join the list. Try again in a moment.");
+}
+
+async function submitWaitlist(
+  email: string,
+  turnstileToken: string,
+  interest: string | null,
+): Promise<SubmitResult> {
+  try {
+    const res = await fetch(`${resolveApiBase()}/api/waitlist`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        turnstileToken,
+        interest: interest ?? undefined,
+      }),
+    });
+    const data: WaitlistResponse = await res.json().catch(() => null);
+    if (!res.ok) return { ok: false, status: res.status, error: data?.error };
+    if (!data?.ok) return { ok: false, status: res.status, error: data?.error };
+    return { ok: true };
+  } catch {
+    return { ok: false, status: 0 };
+  }
+}
+
+function submitLabel(status: FormStatus, hasToken: boolean): string {
+  if (status === "loading") return "Adding…";
+  if (hasToken) return "Join launch list";
+  return "Verify below";
+}
+
+function verificationMessage(state: VerificationState): string {
+  if (state === "ready") return "Security check complete. You can join the list.";
+  if (state === "error") return "Security check needs attention. Retry below.";
+  return "Complete the security check to enable the join button.";
+}
+
+function DoneState() {
+  return (
+    <p className="mx-auto mt-12 max-w-md font-mono text-[13px] uppercase tracking-[0.14em] text-accent">
+      You're on the list. We'll email you when Trackdub ships.
+    </p>
+  );
+}
+
+function SubmitButton({ status, hasToken }: { status: FormStatus; hasToken: boolean }) {
+  return (
+    <button
+      type="submit"
+      disabled={status === "loading" || !hasToken}
+      aria-describedby="waitlist-verification-status"
+      className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
+    >
+      {submitLabel(status, hasToken)}
+    </button>
+  );
+}
+
+function VerificationNote({ state }: { state: VerificationState }) {
+  return (
+    <p
+      id="waitlist-verification-status"
+      className="text-center font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground"
+      aria-live="polite"
+    >
+      {verificationMessage(state)}
+    </p>
+  );
+}
+
+function WaitlistFormView({
+  email,
+  status,
+  hasToken,
+  verificationState,
+  containerRef,
+  onEmailChange,
+  onSubmit,
+  onReset,
+}: {
+  email: string;
+  status: FormStatus;
+  hasToken: boolean;
+  verificationState: VerificationState;
+  containerRef: RefObject<HTMLDivElement | null>;
+  onEmailChange: (value: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  onReset: () => void;
+}) {
+  return (
+    <>
+      <script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__onTurnstileLoad__&render=explicit"
+        async
+        defer
+      />
+      <form
+        onSubmit={onSubmit}
+        className="mx-auto mt-12 flex w-full max-w-md flex-col items-center gap-3"
+        noValidate
+      >
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
+          <label htmlFor="waitlist-email" className="sr-only">
+            Email address
+          </label>
+          <input
+            id="waitlist-email"
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            maxLength={320}
+            placeholder="you@studio.com"
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            disabled={status === "loading"}
+            className="flex-1 rounded-sm border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background disabled:opacity-60"
+          />
+          <SubmitButton status={status} hasToken={hasToken} />
+        </div>
+        <div ref={containerRef} />
+        <VerificationNote state={verificationState} />
+        {verificationState === "error" && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="font-mono text-[11px] uppercase tracking-[0.12em] text-accent underline underline-offset-4"
+          >
+            Retry security check
+          </button>
+        )}
+      </form>
+    </>
+  );
+}
+
 export function WaitlistForm() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [status, setStatus] = useState<FormStatus>("idle");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [verificationState, setVerificationState] = useState<"required" | "ready" | "error">(
-    "required",
-  );
+  const [verificationState, setVerificationState] = useState<VerificationState>("required");
   // The interest tag is read once from the URL (?interest=...) and only used
   // in the signup POST body — it never affects rendered markup, so a lazy
   // initializer is hydration-safe and avoids a state write inside an effect.
@@ -58,10 +224,13 @@ export function WaitlistForm() {
   useEffect(() => {
     let cancelled = false;
     const tryRender = () => {
-      if (cancelled || !widgetContainerRef.current || widgetIdRef.current || !window.turnstile) {
-        return;
-      }
-      widgetIdRef.current = window.turnstile.render(widgetContainerRef.current, {
+      if (cancelled) return;
+      const container = widgetContainerRef.current;
+      if (!container) return;
+      if (widgetIdRef.current) return;
+      const turnstile = window.turnstile;
+      if (!turnstile) return;
+      widgetIdRef.current = turnstile.render(container, {
         sitekey: TURNSTILE_SITE_KEY,
         action: "waitlist_signup",
         callback: (token: string) => {
@@ -104,7 +273,8 @@ export function WaitlistForm() {
     if (status === "loading") return;
     const parsed = waitlistSchema.safeParse({ email });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Invalid email");
+      const issue = parsed.error.issues[0];
+      toast.error(issue ? issue.message : "Invalid email");
       return;
     }
     if (!turnstileToken) {
@@ -113,122 +283,33 @@ export function WaitlistForm() {
       return;
     }
     setStatus("loading");
-    const normalized = parsed.data.email.toLowerCase();
-    // trackdub.dev (ChatGPT Sites) has no D1/Turnstile bindings of its own,
-    // so it posts cross-origin to the canonical API on trackdub.com instead
-    // of relying on its own (nonexistent) server env. Every other host
-    // (localhost, Workers preview URLs, QA) keeps the relative endpoint —
-    // the production preflight only allow-lists trackdub.dev origins, so
-    // routing them to the absolute URL would just fail CORS.
-    const apiBase =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "trackdub.dev" ||
-        window.location.hostname === "www.trackdub.dev")
-        ? "https://trackdub.com"
-        : "";
-    try {
-      const res = await fetch(`${apiBase}/api/waitlist`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: normalized,
-          turnstileToken,
-          interest: interest ?? undefined,
-        }),
-      });
-      const data: { ok: boolean; error?: string } | null = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        setStatus("idle");
-        if (res.status === 403) {
-          resetVerification();
-          toast.error("Verification expired. Please complete it again.");
-          return;
-        }
-        toast.error(data?.error || "Could not join the list. Try again in a moment.");
-        return;
-      }
-    } catch {
-      setStatus("idle");
-      toast.error("Could not reach the server. Try again in a moment.");
+    const result = await submitWaitlist(
+      parsed.data.email.toLowerCase(),
+      turnstileToken,
+      interest,
+    );
+    if (result.ok) {
+      setStatus("done");
+      toast.success("You're on the list.");
       return;
     }
-    setStatus("done");
-    toast.success("You're on the list.");
+    setStatus("idle");
+    reportSubmitFailure(result, resetVerification);
   }
 
-  if (status === "done") {
-    return (
-      <p className="mx-auto mt-12 max-w-md font-mono text-[13px] uppercase tracking-[0.14em] text-accent">
-        You're on the list. We'll email you when Trackdub ships.
-      </p>
-    );
-  }
+  if (status === "done") return <DoneState />;
 
   return (
-    <>
-      <script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__onTurnstileLoad__&render=explicit"
-        async
-        defer
-      />
-      <form
-        onSubmit={onSubmit}
-        className="mx-auto mt-12 flex w-full max-w-md flex-col items-center gap-3"
-        noValidate
-      >
-        <div className="flex w-full flex-col gap-3 sm:flex-row">
-          <label htmlFor="waitlist-email" className="sr-only">
-            Email address
-          </label>
-          <input
-            id="waitlist-email"
-            type="email"
-            required
-            autoComplete="email"
-            inputMode="email"
-            maxLength={320}
-            placeholder="you@studio.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={status === "loading"}
-            className="flex-1 rounded-sm border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background disabled:opacity-60"
-          />
-          <button
-            type="submit"
-            disabled={status === "loading" || !turnstileToken}
-            aria-describedby="waitlist-verification-status"
-            className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
-          >
-            {status === "loading"
-              ? "Adding…"
-              : turnstileToken
-                ? "Join launch list"
-                : "Verify below"}
-          </button>
-        </div>
-        <div ref={widgetContainerRef} />
-        <p
-          id="waitlist-verification-status"
-          className="text-center font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground"
-          aria-live="polite"
-        >
-          {verificationState === "ready"
-            ? "Security check complete. You can join the list."
-            : verificationState === "error"
-              ? "Security check needs attention. Retry below."
-              : "Complete the security check to enable the join button."}
-        </p>
-        {verificationState === "error" && (
-          <button
-            type="button"
-            onClick={resetVerification}
-            className="font-mono text-[11px] uppercase tracking-[0.12em] text-accent underline underline-offset-4"
-          >
-            Retry security check
-          </button>
-        )}
-      </form>
-    </>
+    <WaitlistFormView
+      email={email}
+      status={status}
+      hasToken={Boolean(turnstileToken)}
+      verificationState={verificationState}
+      containerRef={widgetContainerRef}
+      onEmailChange={setEmail}
+      onSubmit={onSubmit}
+      onReset={resetVerification}
+    />
   );
 }
 

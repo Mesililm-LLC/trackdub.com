@@ -49,6 +49,16 @@ function initialJobState(): JobState {
   };
 }
 
+function applyPauseState(prev: JobState, resume: boolean): JobState {
+  const status = { ...prev.status };
+  const from = resume ? "paused" : "running";
+  const to = resume ? "running" : "paused";
+  for (const stage of JOB_STAGES) {
+    if (status[stage.id] === from) status[stage.id] = to;
+  }
+  return { ...prev, status };
+}
+
 type LogEntry = { t: string; msg: string; kind: "info" | "warn" | "ok" };
 
 type FailureKind = "gpu_oom" | "missing_codec" | "partial_ingest";
@@ -166,15 +176,7 @@ export function ResumableJob() {
     if (failure) return;
     setRunning((r) => {
       const next = !r;
-      setJob((prev) => {
-        const s = { ...prev.status };
-        if (!next) {
-          for (const st of JOB_STAGES) if (s[st.id] === "running") s[st.id] = "paused";
-        } else {
-          for (const st of JOB_STAGES) if (s[st.id] === "paused") s[st.id] = "running";
-        }
-        return { ...prev, status: s };
-      });
+      setJob((prev) => applyPauseState(prev, next));
       addLog(
         next ? "Resume · continuing from last checkpoint" : "Pause · state persisted to disk",
         "warn",
@@ -515,40 +517,30 @@ export function ResumableJob() {
   );
 }
 
+const STATUS_COLORS: Record<JobStageStatus, string> = {
+  done: "oklch(0.72 0.10 155)",
+  running: ACC,
+  paused: "oklch(0.70 0.02 245)",
+  stale: ACC,
+  failed: "oklch(0.68 0.16 30)",
+  queued: "oklch(0.38 0.014 250)",
+};
+
+const STATUS_LABELS: Record<JobStageStatus, (pct: number) => string> = {
+  done: () => "done",
+  running: (pct) => `${pct}%`,
+  paused: (pct) => `paused · ${pct}%`,
+  stale: () => "stale · requeued",
+  failed: (pct) => `failed · ${pct}%`,
+  queued: () => "queued",
+};
+
 function statusColor(s: JobStageStatus): string {
-  switch (s) {
-    case "done":
-      return "oklch(0.72 0.10 155)";
-    case "running":
-      return ACC;
-    case "paused":
-      return "oklch(0.70 0.02 245)";
-    case "stale":
-      return ACC;
-    case "failed":
-      return "oklch(0.68 0.16 30)";
-    case "queued":
-    default:
-      return "oklch(0.38 0.014 250)";
-  }
+  return STATUS_COLORS[s];
 }
 
 function statusLabel(s: JobStageStatus, pct: number): string {
-  switch (s) {
-    case "done":
-      return "done";
-    case "running":
-      return `${pct}%`;
-    case "paused":
-      return `paused · ${pct}%`;
-    case "stale":
-      return "stale · requeued";
-    case "failed":
-      return `failed · ${pct}%`;
-    case "queued":
-    default:
-      return "queued";
-  }
+  return STATUS_LABELS[s](pct);
 }
 
 /* ---------------- product plate (single figure) ---------------- */
