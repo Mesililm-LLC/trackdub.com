@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { NAV, now, setLocationHash } from "@/components/home/helpers";
+import {
+  inertiaSettled,
+  progressChanged,
+  railProgress,
+  releasePointerCaptureSafely,
+  shouldActivateHash,
+  shouldCoastAfterRelease,
+  tapReleaseY,
+  type RailFrame,
+  type ScrubEnd,
+} from "@/components/home/section-rail-logic";
 
 export function SectionRail() {
   const [active, setActive] = useState<string>("");
@@ -201,7 +212,7 @@ export function SectionRail() {
       window.scrollTo(0, nextY);
       v *= Math.pow(decayPerMs, dt);
       // Stop at edges or when velocity is negligible.
-      if (Math.abs(v) < 0.02 || nextY === 0 || nextY === docMax) {
+      if (inertiaSettled(v, nextY, docMax)) {
         inertiaRafRef.current = null;
         return;
       }
@@ -265,7 +276,7 @@ export function SectionRail() {
     if (typeof window === "undefined") return;
     const syncFromHash = () => {
       const id = window.location.hash.slice(1);
-      if (id && navIds.current.has(id) && id !== activeRef.current) {
+      if (shouldActivateHash(id, navIds.current, activeRef.current)) {
         setActive(id);
       }
     };
@@ -336,58 +347,69 @@ export function SectionRail() {
     let rafId: number | null = null;
     let ticking = false;
 
+    // Per-property writers: each gates on a "changed enough" check so we
+    // never touch style or attributes when nothing moved.
+    const writeVisibility = ({ y }: RailFrame) => {
+      const nextVisible = y > 480;
+      if (nextVisible === lastVisible) return;
+      lastVisible = nextVisible;
+      setVisible(nextVisible);
+    };
+
+    const writeProgressFill = ({ progress: p }: RailFrame) => {
+      if (!progressChanged(p, lastProgress)) return;
+      lastProgress = p;
+      const fill = progressFillRef.current;
+      if (fill) fill.style.transform = `scaleY(${p})`;
+    };
+
+    // Only when the rounded value flips.
+    const writeAriaValue = ({ progress: p }: RailFrame) => {
+      const ariaVal = Math.round(p * 100);
+      if (ariaVal === lastAria) return;
+      lastAria = ariaVal;
+      const list = listRef.current;
+      if (list) list.setAttribute("aria-valuenow", String(ariaVal));
+    };
+
+    // offsetTop/offsetHeight against offsetParent (the rail list) is cheap,
+    // no full layout flush.
+    const writeIndicator = ({ activeEl }: RailFrame) => {
+      if (!activeEl) return;
+      const top = activeEl.offsetTop;
+      const height = activeEl.offsetHeight;
+      const ind = indicatorRef.current;
+      if (!ind) return;
+      if (top !== lastIndTop) {
+        lastIndTop = top;
+        ind.style.transform = `translateY(${top}px)`;
+      }
+      if (height !== lastIndHeight) {
+        lastIndHeight = height;
+        ind.style.height = `${height}px`;
+      }
+    };
+
     // Strict-ordered, redundant-write-free write pass. Reads first, then
     // writes in a fixed order: visibility → progress fill → aria-valuenow →
-    // indicator geometry. Each property gates on a "changed enough" check
-    // so we never touch style or attributes when nothing moved.
+    // indicator geometry.
     const writeRailFrame = () => {
       ticking = false;
       rafId = null;
 
       // 1) Reads (batched — no interleaved writes → no layout thrash)
       const y = window.scrollY;
-      const p = docMax > 0 ? Math.min(1, Math.max(0, y / docMax)) : 0;
-      const activeEl = itemsRef.current[activeRef.current];
+      const frame: RailFrame = {
+        y,
+        progress: railProgress(y, docMax),
+        activeEl: itemsRef.current[activeRef.current],
+      };
 
-      // 2) Visibility
-      const nextVisible = y > 480;
-      if (nextVisible !== lastVisible) {
-        lastVisible = nextVisible;
-        setVisible(nextVisible);
-      }
-
-      // 3) Progress fill
-      if (Math.abs(p - lastProgress) > 0.002) {
-        lastProgress = p;
-        const fill = progressFillRef.current;
-        if (fill) fill.style.transform = `scaleY(${p})`;
-      }
-
-      // 4) aria-valuenow — only when the rounded value flips
-      const ariaVal = Math.round(p * 100);
-      if (ariaVal !== lastAria) {
-        lastAria = ariaVal;
-        const list = listRef.current;
-        if (list) list.setAttribute("aria-valuenow", String(ariaVal));
-      }
-
-      // 5) Active indicator — offsetTop/offsetHeight against offsetParent
-      //    (the rail list) is cheap, no full layout flush.
-      if (activeEl) {
-        const top = activeEl.offsetTop;
-        const height = activeEl.offsetHeight;
-        const ind = indicatorRef.current;
-        if (ind) {
-          if (top !== lastIndTop) {
-            lastIndTop = top;
-            ind.style.transform = `translateY(${top}px)`;
-          }
-          if (height !== lastIndHeight) {
-            lastIndHeight = height;
-            ind.style.height = `${height}px`;
-          }
-        }
-      }
+      // 2) Visibility → 3) Progress fill → 4) aria-valuenow → 5) Active indicator
+      writeVisibility(frame);
+      writeProgressFill(frame);
+      writeAriaValue(frame);
+      writeIndicator(frame);
     };
 
     const schedule = () => {
@@ -491,53 +513,58 @@ export function SectionRail() {
       applyScrubFromClientY(e.clientY);
     }
   };
+  // Flush any pending scrub rAF so scroll position is final before we decide
+  // what to do next — otherwise inertia (or the resync frame) starts from a
+  // stale y.
+  const flushPendingScrub = () => {
+    if (scrubRafRef.current === null) return;
+    window.cancelAnimationFrame(scrubRafRef.current);
+    scrubRafRef.current = null;
+    const pendingY = pendingScrubYRef.current;
+    if (pendingY === null) return;
+    applyScrubFromClientY(pendingY);
+    pendingScrubYRef.current = null;
+  };
+
+  const endDrag = (end: ScrubEnd) => {
+    const isTouch = pointerTypeRef.current === "touch";
+    if (shouldCoastAfterRelease(isTouch, end)) {
+      startInertia(releaseVelocity());
+    }
+    // Reset next tick so the anchor's own click handler (fired after
+    // pointerup) still sees suppressClickRef=true and cancels navigation.
+    window.setTimeout(() => {
+      draggingRef.current = false;
+      setScrubbing(false);
+    }, 0);
+  };
+
+  // Non-drag release with real coordinates = a click/tap on the rail.
+  const endTap = (end: ScrubEnd) => {
+    const tapY = tapReleaseY(end);
+    if (tapY === null) return;
+    suppressClickRef.current = true;
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+    const id = nearestChapterId(tapY);
+    if (id) jumpToChapter(id);
+  };
+
   // Single teardown path for every scrub end (clean release, cancel, or
   // global safety-net). `endType` mirrors PointerEvent.type semantics —
   // "pointercancel" skips inertia and skips click/tap resolution; `clientY`
   // is null when the global safety net triggered (no pointer coordinates).
   const finishScrub = (endType: string, clientY: number | null) => {
-    const list = listRef.current;
-    const pid = activePointerIdRef.current;
-    // Always attempt to release capture — belt and braces against browsers
-    // that report hasPointerCapture=false while still holding it.
-    if (list && pid !== null) {
-      try {
-        if (list.hasPointerCapture?.(pid)) list.releasePointerCapture(pid);
-      } catch {
-        /* already released */
-      }
-    }
-    // Always flush any pending scrub rAF so scroll position is final before
-    // we decide what to do next — otherwise inertia (or the resync frame)
-    // starts from a stale y.
-    if (scrubRafRef.current !== null) {
-      window.cancelAnimationFrame(scrubRafRef.current);
-      scrubRafRef.current = null;
-      if (pendingScrubYRef.current !== null) {
-        applyScrubFromClientY(pendingScrubYRef.current);
-        pendingScrubYRef.current = null;
-      }
-    }
-    const isTouch = pointerTypeRef.current === "touch";
-    const wasDragging = draggingRef.current;
-    if (wasDragging) {
-      if (isTouch && endType !== "pointercancel") {
-        startInertia(releaseVelocity());
-      }
-      // Reset next tick so the anchor's own click handler (fired after
-      // pointerup) still sees suppressClickRef=true and cancels navigation.
-      window.setTimeout(() => {
-        draggingRef.current = false;
-        setScrubbing(false);
-      }, 0);
-    } else if (endType !== "pointercancel" && clientY !== null) {
-      // Non-drag release with real coordinates = a click/tap on the rail.
-      suppressClickRef.current = true;
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 0);
-      const id = nearestChapterId(clientY);
-      if (id) jumpToChapter(id);
+    // Always attempt to release capture.
+    releasePointerCaptureSafely(listRef.current, activePointerIdRef.current);
+    // Always flush any pending scrub rAF.
+    flushPendingScrub();
+    const end: ScrubEnd = { endType, clientY };
+    if (draggingRef.current) {
+      endDrag(end);
+    } else {
+      endTap(end);
     }
     scrubSamplesRef.current = [];
     activePointerIdRef.current = null;
