@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Container, SectionNumber } from "@/components/home/shared";
 import { STAGES } from "@/components/home/pipeline-stages";
 
@@ -258,7 +259,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
                   className="relative h-5 w-full"
                   style={{ background: "oklch(0.20 0.012 250)" }}
                 >
-                  {(pts as number[]).reduce<React.ReactNode[]>((acc, p, i, arr) => {
+                  {(pts as number[]).reduce<ReactNode[]>((acc, p, i, arr) => {
                     if (i % 2 === 1) return acc;
                     const next = arr[i + 1] ?? p + 8;
                     acc.push(
