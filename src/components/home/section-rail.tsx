@@ -66,9 +66,16 @@ export function SectionRail() {
     }
   };
 
-  const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+  const easeOutExpo = ({ t }: { t: number }) =>
+    t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
 
-  const animateScrollTo = (targetY: number) => {
+  const isInertiaSettled = ({ v, nextY, docMax }: { v: number; nextY: number; docMax: number }) => {
+    if (Math.abs(v) < 0.02) return true;
+    if (nextY === 0) return true;
+    return nextY === docMax;
+  };
+
+  const animateScrollTo = ({ targetY }: { targetY: number }) => {
     const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     const clamped = Math.min(docMax, Math.max(0, targetY));
     // If a scroll is in flight, retarget it: keep the current position as the
@@ -89,7 +96,7 @@ export function SectionRail() {
       }
       const elapsed = now() - start.t;
       const p = Math.min(1, elapsed / smoothDurRef.current);
-      const y = start.y + (target - start.y) * easeOutExpo(p);
+      const y = start.y + (target - start.y) * easeOutExpo({ t: p });
       window.scrollTo(0, y);
       if (p < 1) {
         smoothRafRef.current = window.requestAnimationFrame(step);
@@ -102,7 +109,7 @@ export function SectionRail() {
     smoothRafRef.current = window.requestAnimationFrame(step);
   };
 
-  const scrollToTargetId = (id: string) => {
+  const scrollToTargetId = ({ id }: { id: string }) => {
     const target = document.getElementById(id);
     if (!target) return;
     const top = target.getBoundingClientRect().top + window.scrollY;
@@ -111,10 +118,10 @@ export function SectionRail() {
       window.scrollTo({ top, behavior: "auto" });
       return;
     }
-    animateScrollTo(top);
+    animateScrollTo({ targetY: top });
   };
 
-  const applyScrubFromClientY = (clientY: number) => {
+  const applyScrubFromClientY = ({ clientY }: { clientY: number }) => {
     const list = listRef.current;
     if (!list) return;
     const box = list.getBoundingClientRect();
@@ -131,7 +138,7 @@ export function SectionRail() {
   // Resolve a pointer y to the nearest chapter anchor. Powers "click anywhere
   // on the rail" — clicks that don't land exactly on an anchor still jump to
   // the closest chapter instead of doing nothing.
-  const nearestChapterId = (clientY: number): string | null => {
+  const nearestChapterId = ({ clientY }: { clientY: number }): string | null => {
     let bestId: string | null = null;
     let bestDist = Infinity;
     for (const [id, el] of Object.entries(itemsRef.current)) {
@@ -147,7 +154,7 @@ export function SectionRail() {
     return bestId;
   };
 
-  const jumpToChapter = (id: string) => {
+  const jumpToChapter = ({ id }: { id: string }) => {
     const href = `#${id}`;
     if (window.history?.pushState) {
       window.history.pushState(null, "", href);
@@ -155,12 +162,12 @@ export function SectionRail() {
     } else {
       setLocationHash(href);
     }
-    scrollToTargetId(id);
+    scrollToTargetId({ id });
   };
 
   // Convert a pointer sample into document scroll position, but only push
   // samples for velocity — the actual scroll happens via applyScrubFromClientY.
-  const pushSample = (clientY: number) => {
+  const pushSample = ({ clientY }: { clientY: number }) => {
     const list = listRef.current;
     if (!list) return;
     const box = list.getBoundingClientRect();
@@ -183,7 +190,7 @@ export function SectionRail() {
     return (last.y - first.y) / dt; // px per ms in document space
   };
 
-  const startInertia = (v0: number) => {
+  const startInertia = ({ v0 }: { v0: number }) => {
     // Ignore trivial flicks so a slow drag doesn't drift after release.
     if (Math.abs(v0) < 0.35) return;
     cancelInertia();
@@ -201,7 +208,7 @@ export function SectionRail() {
       window.scrollTo(0, nextY);
       v *= Math.pow(decayPerMs, dt);
       // Stop at edges or when velocity is negligible.
-      if (Math.abs(v) < 0.02 || nextY === 0 || nextY === docMax) {
+      if (isInertiaSettled({ v, nextY, docMax })) {
         inertiaRafRef.current = null;
         return;
       }
@@ -210,14 +217,14 @@ export function SectionRail() {
     inertiaRafRef.current = window.requestAnimationFrame(step);
   };
 
-  const scheduleScrub = (clientY: number) => {
+  const scheduleScrub = ({ clientY }: { clientY: number }) => {
     pendingScrubYRef.current = clientY;
     if (scrubRafRef.current !== null) return;
     scrubRafRef.current = window.requestAnimationFrame(() => {
       scrubRafRef.current = null;
       const y = pendingScrubYRef.current;
       pendingScrubYRef.current = null;
-      if (y !== null) applyScrubFromClientY(y);
+      if (y !== null) applyScrubFromClientY({ clientY: y });
     });
   };
   useEffect(() => {
@@ -265,9 +272,10 @@ export function SectionRail() {
     if (typeof window === "undefined") return;
     const syncFromHash = () => {
       const id = window.location.hash.slice(1);
-      if (id && navIds.current.has(id) && id !== activeRef.current) {
-        setActive(id);
-      }
+      if (!id) return;
+      if (!navIds.current.has(id)) return;
+      if (id === activeRef.current) return;
+      setActive(id);
     };
     syncFromHash();
     window.addEventListener("hashchange", syncFromHash);
@@ -336,6 +344,44 @@ export function SectionRail() {
     let rafId: number | null = null;
     let ticking = false;
 
+    const writeVisibility = ({ y }: { y: number }) => {
+      const nextVisible = y > 480;
+      if (nextVisible === lastVisible) return;
+      lastVisible = nextVisible;
+      setVisible(nextVisible);
+    };
+
+    const writeProgress = ({ p }: { p: number }) => {
+      if (Math.abs(p - lastProgress) <= 0.002) return;
+      lastProgress = p;
+      const fill = progressFillRef.current;
+      if (fill) fill.style.transform = `scaleY(${p})`;
+    };
+
+    const writeAria = ({ p }: { p: number }) => {
+      const ariaVal = Math.round(p * 100);
+      if (ariaVal === lastAria) return;
+      lastAria = ariaVal;
+      const list = listRef.current;
+      if (list) list.setAttribute("aria-valuenow", String(ariaVal));
+    };
+
+    const writeIndicator = (activeEl: HTMLElement | undefined) => {
+      if (!activeEl) return;
+      const top = activeEl.offsetTop;
+      const height = activeEl.offsetHeight;
+      const ind = indicatorRef.current;
+      if (!ind) return;
+      if (top !== lastIndTop) {
+        lastIndTop = top;
+        ind.style.transform = `translateY(${top}px)`;
+      }
+      if (height !== lastIndHeight) {
+        lastIndHeight = height;
+        ind.style.height = `${height}px`;
+      }
+    };
+
     // Strict-ordered, redundant-write-free write pass. Reads first, then
     // writes in a fixed order: visibility → progress fill → aria-valuenow →
     // indicator geometry. Each property gates on a "changed enough" check
@@ -344,50 +390,15 @@ export function SectionRail() {
       ticking = false;
       rafId = null;
 
-      // 1) Reads (batched — no interleaved writes → no layout thrash)
+      // Reads (batched — no interleaved writes → no layout thrash)
       const y = window.scrollY;
       const p = docMax > 0 ? Math.min(1, Math.max(0, y / docMax)) : 0;
-      const activeEl = itemsRef.current[activeRef.current];
+      const activeEl = itemsRef.current[activeRef.current] ?? undefined;
 
-      // 2) Visibility
-      const nextVisible = y > 480;
-      if (nextVisible !== lastVisible) {
-        lastVisible = nextVisible;
-        setVisible(nextVisible);
-      }
-
-      // 3) Progress fill
-      if (Math.abs(p - lastProgress) > 0.002) {
-        lastProgress = p;
-        const fill = progressFillRef.current;
-        if (fill) fill.style.transform = `scaleY(${p})`;
-      }
-
-      // 4) aria-valuenow — only when the rounded value flips
-      const ariaVal = Math.round(p * 100);
-      if (ariaVal !== lastAria) {
-        lastAria = ariaVal;
-        const list = listRef.current;
-        if (list) list.setAttribute("aria-valuenow", String(ariaVal));
-      }
-
-      // 5) Active indicator — offsetTop/offsetHeight against offsetParent
-      //    (the rail list) is cheap, no full layout flush.
-      if (activeEl) {
-        const top = activeEl.offsetTop;
-        const height = activeEl.offsetHeight;
-        const ind = indicatorRef.current;
-        if (ind) {
-          if (top !== lastIndTop) {
-            lastIndTop = top;
-            ind.style.transform = `translateY(${top}px)`;
-          }
-          if (height !== lastIndHeight) {
-            lastIndHeight = height;
-            ind.style.height = `${height}px`;
-          }
-        }
-      }
+      writeVisibility({ y });
+      writeProgress({ p });
+      writeAria({ p });
+      writeIndicator(activeEl);
     };
 
     const schedule = () => {
@@ -448,7 +459,7 @@ export function SectionRail() {
     // If a prior gesture never cleanly released (rare browser edge case),
     // tear it down before starting a new one so state stays consistent.
     if (activePointerIdRef.current !== null) {
-      finishScrub("pointercancel", null);
+      finishScrub({ endType: "pointercancel", clientY: null });
     }
     pointerTypeRef.current = e.pointerType;
     // Velocity samples are only used for touch inertia.
@@ -482,62 +493,74 @@ export function SectionRail() {
     e.preventDefault();
     if (isTouch) {
       // Touch: rAF-coalesce writes and sample velocity so release can fling.
-      pushSample(e.clientY);
-      scheduleScrub(e.clientY);
+      pushSample({ clientY: e.clientY });
+      scheduleScrub({ clientY: e.clientY });
     } else {
       // Mouse / pen: 1:1 with the cursor. Apply synchronously so the page
       // tracks the pointer every frame, like a native scrollbar thumb —
       // no rAF batching, no velocity buffering, no inertia on release.
-      applyScrubFromClientY(e.clientY);
+      applyScrubFromClientY({ clientY: e.clientY });
     }
   };
+  const releaseRailCapture = () => {
+    const list = listRef.current;
+    const pid = activePointerIdRef.current;
+    if (!list || pid === null) return;
+    // Always attempt to release capture — belt and braces against browsers
+    // that report hasPointerCapture=false while still holding it.
+    try {
+      if (list.hasPointerCapture?.(pid)) list.releasePointerCapture(pid);
+    } catch {
+      /* already released */
+    }
+  };
+
+  const flushPendingScrub = () => {
+    if (scrubRafRef.current === null) return;
+    window.cancelAnimationFrame(scrubRafRef.current);
+    scrubRafRef.current = null;
+    const pendingY = pendingScrubYRef.current;
+    pendingScrubYRef.current = null;
+    if (pendingY !== null) applyScrubFromClientY({ clientY: pendingY });
+  };
+
+  const resolveRailClick = ({ clientY }: { clientY: number }) => {
+    suppressClickRef.current = true;
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+    const id = nearestChapterId({ clientY });
+    if (id) jumpToChapter({ id });
+  };
+
+  const finishDrag = ({ isTouch, endType }: { isTouch: boolean; endType: string }) => {
+    if (isTouch && endType !== "pointercancel") {
+      startInertia({ v0: releaseVelocity() });
+    }
+    // Reset next tick so the anchor's own click handler (fired after
+    // pointerup) still sees suppressClickRef=true and cancels navigation.
+    window.setTimeout(() => {
+      draggingRef.current = false;
+      setScrubbing(false);
+    }, 0);
+  };
+
   // Single teardown path for every scrub end (clean release, cancel, or
   // global safety-net). `endType` mirrors PointerEvent.type semantics —
   // "pointercancel" skips inertia and skips click/tap resolution; `clientY`
   // is null when the global safety net triggered (no pointer coordinates).
-  const finishScrub = (endType: string, clientY: number | null) => {
-    const list = listRef.current;
-    const pid = activePointerIdRef.current;
-    // Always attempt to release capture — belt and braces against browsers
-    // that report hasPointerCapture=false while still holding it.
-    if (list && pid !== null) {
-      try {
-        if (list.hasPointerCapture?.(pid)) list.releasePointerCapture(pid);
-      } catch {
-        /* already released */
-      }
-    }
+  const finishScrub = ({ endType, clientY }: { endType: string; clientY: number | null }) => {
+    releaseRailCapture();
     // Always flush any pending scrub rAF so scroll position is final before
     // we decide what to do next — otherwise inertia (or the resync frame)
     // starts from a stale y.
-    if (scrubRafRef.current !== null) {
-      window.cancelAnimationFrame(scrubRafRef.current);
-      scrubRafRef.current = null;
-      if (pendingScrubYRef.current !== null) {
-        applyScrubFromClientY(pendingScrubYRef.current);
-        pendingScrubYRef.current = null;
-      }
-    }
+    flushPendingScrub();
     const isTouch = pointerTypeRef.current === "touch";
-    const wasDragging = draggingRef.current;
-    if (wasDragging) {
-      if (isTouch && endType !== "pointercancel") {
-        startInertia(releaseVelocity());
-      }
-      // Reset next tick so the anchor's own click handler (fired after
-      // pointerup) still sees suppressClickRef=true and cancels navigation.
-      window.setTimeout(() => {
-        draggingRef.current = false;
-        setScrubbing(false);
-      }, 0);
+    if (draggingRef.current) {
+      finishDrag({ isTouch, endType });
     } else if (endType !== "pointercancel" && clientY !== null) {
       // Non-drag release with real coordinates = a click/tap on the rail.
-      suppressClickRef.current = true;
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 0);
-      const id = nearestChapterId(clientY);
-      if (id) jumpToChapter(id);
+      resolveRailClick({ clientY });
     }
     scrubSamplesRef.current = [];
     activePointerIdRef.current = null;
@@ -554,7 +577,7 @@ export function SectionRail() {
     if (activePointerIdRef.current !== null && e.pointerId !== activePointerIdRef.current) {
       return;
     }
-    finishScrub(e.type, e.clientY);
+    finishScrub({ endType: e.type, clientY: e.clientY });
   };
 
   // The pointer handlers are recreated every render, but the native-listener
@@ -600,24 +623,24 @@ export function SectionRail() {
     // get stuck in a captured/dragging state.
     const onWindowCancel = (e: PointerEvent) => {
       if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
-        handlers.current.finish("pointercancel", null);
+        handlers.current.finish({ endType: "pointercancel", clientY: null });
       }
     };
     const onWindowUp = (e: PointerEvent) => {
       // Only fires if the element handler missed it (e.g. pointer released
       // outside a captured region on a browser that dropped capture).
       if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
-        handlers.current.finish(e.type, e.clientY);
+        handlers.current.finish({ endType: e.type, clientY: e.clientY });
       }
     };
     const onLostCapture = () => {
       if (activePointerIdRef.current !== null) {
-        handlers.current.finish("pointercancel", null);
+        handlers.current.finish({ endType: "pointercancel", clientY: null });
       }
     };
     const onBlurOrHide = () => {
       if (activePointerIdRef.current !== null) {
-        handlers.current.finish("pointercancel", null);
+        handlers.current.finish({ endType: "pointercancel", clientY: null });
       }
     };
     window.addEventListener("pointercancel", onWindowCancel, { passive: true });
@@ -711,7 +734,7 @@ export function SectionRail() {
                 } else {
                   window.location.hash = n.href;
                 }
-                scrollToTargetId(id);
+                scrollToTargetId({ id });
               }}
             >
               <span
