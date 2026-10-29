@@ -127,7 +127,10 @@ function WorkstationTitlebar() {
 function StagesPanel() {
   return (
     <div className="col-span-3 border-r p-4" style={{ borderColor: WS_LINE }}>
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: WS_DIM }}>
+      <div
+        className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ color: WS_DIM }}
+      >
         Run
       </div>
       <ol className="space-y-1.5">
@@ -176,7 +179,10 @@ function ScriptPanel() {
   return (
     <div className="col-span-6 border-r p-5" style={{ borderColor: WS_LINE }}>
       <div className="mb-3 flex items-center justify-between">
-        <div className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: WS_DIM }}>
+        <div
+          className="font-mono text-[10px] uppercase tracking-[0.14em]"
+          style={{ color: WS_DIM }}
+        >
           Script · line 42
         </div>
         <div className="font-mono text-[10px]" style={{ color: WS_DIM }}>
@@ -248,7 +254,10 @@ function ScriptPanel() {
 function StageMetaPanel() {
   return (
     <div className="col-span-3 p-4">
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: WS_DIM }}>
+      <div
+        className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ color: WS_DIM }}
+      >
         Stage
       </div>
       {STAGE_STATUSES.map(([name, status, color]) => (
@@ -284,7 +293,10 @@ function StageMetaPanel() {
 function TimelineFooter() {
   return (
     <div className="border-t px-4 py-3" style={{ borderColor: WS_LINE }}>
-      <div className="mb-2 grid grid-cols-[80px_1fr] gap-3 font-mono text-[9px]" style={{ color: WS_DIM }}>
+      <div
+        className="mb-2 grid grid-cols-[80px_1fr] gap-3 font-mono text-[9px]"
+        style={{ color: WS_DIM }}
+      >
         <span>00:00:00</span>
         <div className="flex justify-between">
           <span>00:00:05</span>

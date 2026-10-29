@@ -106,9 +106,9 @@ export function Walkthrough() {
     markStale({ lineId: id, downstream: ["voice"] });
     clearStale({ lineId: id, stage: "translate" });
   };
-  const reassignSpeaker = ({ id, speakerId }: { id: number; speakerId: string }) => {
-    setLines((ls) => ls.map((l) => (l.id === id ? { ...l, speakerId } : l)));
-    markStale({ lineId: id, downstream: ["voice"] });
+  const reassignSpeaker = ({ lineId, speakerId }: { lineId: number; speakerId: string }) => {
+    setLines((ls) => ls.map((l) => (l.id === lineId ? { ...l, speakerId } : l)));
+    markStale({ lineId, downstream: ["voice"] });
   };
   const renameSpeaker = ({ id, name }: { id: string; name: string }) => {
     setSpeakers((ss) => ss.map((s) => (s.id === id ? { ...s, name } : s)));
@@ -563,8 +563,7 @@ function VoiceLine({
         style={{ color: DIM }}
       >
         <span>
-          Line {line.id} · {line.t} ·{" "}
-          <span style={{ color: speaker?.color }}>{speaker?.name}</span>
+          Line {line.id} · {line.t} · <span style={{ color: speaker?.color }}>{speaker?.name}</span>
           {stale && !busy && <StaleTag label="needs regen" />}
           {busy && <StaleTag label="regenerating…" />}
         </span>

@@ -118,9 +118,7 @@ function TranscribeInset() {
           </span>
           <span>
             {a}{" "}
-            <span style={{ background: "oklch(0.68 0.14 50 / 0.25)", padding: "0 2px" }}>
-              {hi}
-            </span>
+            <span style={{ background: "oklch(0.68 0.14 50 / 0.25)", padding: "0 2px" }}>{hi}</span>
             {b}
           </span>
         </div>

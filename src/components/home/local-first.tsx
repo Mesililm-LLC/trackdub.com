@@ -291,7 +291,9 @@ function RequirementsSection() {
             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
               {t.eyebrow}
             </div>
-            <div className="mt-2 font-serif text-[26px] leading-tight text-foreground">{t.name}</div>
+            <div className="mt-2 font-serif text-[26px] leading-tight text-foreground">
+              {t.name}
+            </div>
             <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t.tagline}</p>
             <dl className="mt-5 space-y-2.5">
               {t.rows.map(([k, v]) => (

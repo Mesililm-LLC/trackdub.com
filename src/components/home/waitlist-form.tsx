@@ -283,11 +283,7 @@ export function WaitlistForm() {
       return;
     }
     setStatus("loading");
-    const result = await submitWaitlist(
-      parsed.data.email.toLowerCase(),
-      turnstileToken,
-      interest,
-    );
+    const result = await submitWaitlist(parsed.data.email.toLowerCase(), turnstileToken, interest);
     if (result.ok) {
       setStatus("done");
       toast.success("You're on the list.");

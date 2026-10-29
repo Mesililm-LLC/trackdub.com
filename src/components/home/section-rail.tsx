@@ -66,8 +66,7 @@ export function SectionRail() {
     }
   };
 
-  const easeOutExpo = ({ t }: { t: number }) =>
-    t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  const easeOutExpo = ({ t }: { t: number }) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
   const isInertiaSettled = ({ v, nextY, docMax }: { v: number; nextY: number; docMax: number }) => {
     if (Math.abs(v) < 0.02) return true;
