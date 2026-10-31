@@ -51,7 +51,7 @@ the real product.
   editable, and rerunnable, from the transcript to the final mix. Media
   never leaves the machine unless the user says so.
 - **Contact:** `hello@trackdub.com` · press `press@trackdub.com`
-- **Repo:** github.com/mesalimllc (public)
+- **Repo:** github.com/MesilimLLC (public)
 
 ### Trust strip
 

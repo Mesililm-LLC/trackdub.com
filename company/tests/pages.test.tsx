@@ -48,7 +48,7 @@ describe("published company documents", () => {
   test("portfolio keeps existing owners and the product conversion path", () => {
     const all = pages.map((page) => renderToStaticMarkup(page.element)).join("");
     for (const link of [
-      "https://github.com/mesalimllc/LinML",
+      "https://github.com/MesilimLLC/LinML",
       "https://github.com/numan-cli/numan",
       "https://github.com/tonythethompson/lucid-mem",
       "https://www.npmjs.com/package/lucid-mem",

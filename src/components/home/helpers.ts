@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 
-export const GITHUB_REPO = "https://github.com/mesalimllc/Trackdub";
+export const GITHUB_REPO = "https://github.com/MesilimLLC/Trackdub";
 
 // Module-scope helpers for browser APIs that React's purity rules flag when
 // they appear lexically inside component code. Every call site below is an

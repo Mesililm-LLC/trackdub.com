@@ -8,9 +8,9 @@ export const projects = [
     headline: "Run ONNX models on Linux.",
     summary:
       "An independent Linux-first inference stack, started to give Trackdub a WinML-like experience on Linux.",
-    source: "https://github.com/mesalimllc/LinML",
-    docs: "https://github.com/mesalimllc/LinML#readme",
-    secondary: "https://github.com/mesalimllc/LinML#readme",
+    source: "https://github.com/MesilimLLC/LinML",
+    docs: "https://github.com/MesilimLLC/LinML#readme",
+    secondary: "https://github.com/MesilimLLC/LinML#readme",
     secondaryLabel: "Releases & documentation",
     audience: "ML and systems developers",
     interface: "CLI / Python / NuGet",

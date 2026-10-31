@@ -1,7 +1,7 @@
 # Review Guide
 
 Use this file when reviewing pull requests in the Trackdub marketing site
-(`mesalimllc/trackdub.com`).
+(`MesilimLLC/trackdub.com`).
 
 This is a reviewer checklist, not an authoring guide. For local commands, see
 `README.md`. For agent Linear sync, see `AGENTS.md`.
