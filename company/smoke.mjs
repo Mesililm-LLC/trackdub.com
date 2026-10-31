@@ -20,7 +20,7 @@ for (const path of paths) {
   assert.equal(response.status, 200, path);
   const html = await response.text();
   assert.ok(
-    html.includes(`rel="canonical" href="https://mesalim.com${path}"`),
+    html.includes(`rel="canonical" href="https://mesilim.org${path}"`),
     `${path}: canonical`,
   );
   assert.equal((html.match(/<h1[ >]/g) ?? []).length, 1, `${path}: heading`);

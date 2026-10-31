@@ -31,13 +31,13 @@ for (const page of pages) {
 const canonicalPages = pages.filter((page) => page.path !== "/404");
 await writeFile(
   join(out, "sitemap.xml"),
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${canonicalPages.map((page) => `<url><loc>https://mesalim.com${page.path}</loc></url>`).join("")}</urlset>\n`,
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${canonicalPages.map((page) => `<url><loc>https://mesilim.org${page.path}</loc></url>`).join("")}</urlset>\n`,
 );
 await writeFile(
   join(out, "robots.txt"),
   preview
     ? "User-agent: *\nDisallow: /\n"
-    : "User-agent: *\nAllow: /\nSitemap: https://mesalim.com/sitemap.xml\n",
+    : "User-agent: *\nAllow: /\nSitemap: https://mesilim.org/sitemap.xml\n",
 );
 // Validate the copied image is present before producing a deployable build.
 await readFile(join(out, "images/trackdub-early-build.png"));

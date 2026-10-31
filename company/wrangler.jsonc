@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/wrangler/config-schema.json",
-  "name": "mesalim-company-preview",
+  "name": "mesilim-company-preview",
   "main": "worker.mjs",
   "compatibility_date": "2026-07-29",
   "workers_dev": true,
@@ -15,17 +15,17 @@
   "observability": { "enabled": false },
   "env": {
     "preview": {
-      "name": "mesalim-company-preview",
+      "name": "mesilim-company-preview",
       "workers_dev": true,
       "vars": { "SITE_ENV": "preview" }
     },
     "production": {
-      "name": "mesalim-company",
+      "name": "mesilim-company",
       "workers_dev": false,
       "vars": { "SITE_ENV": "production" },
       "routes": [
-        { "pattern": "mesalim.com", "custom_domain": true },
-        { "pattern": "www.mesalim.com", "custom_domain": true },
+        { "pattern": "mesilim.org", "custom_domain": true },
+        { "pattern": "www.mesilim.org", "custom_domain": true },
       ],
     },
   },

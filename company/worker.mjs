@@ -1,5 +1,5 @@
 const PRODUCT_ORIGIN = "https://trackdub.com";
-const COMPANY_ORIGIN = "https://mesalim.com";
+const COMPANY_ORIGIN = "https://mesilim.org";
 const aliases = new Set(["/pricing", "/docs", "/changelog", "/guides", "/guides/ai-dubbing-guide"]);
 
 export default {
@@ -7,8 +7,8 @@ export default {
     const url = new URL(request.url);
     // Only apex/www are normalized; preview/local hosts remain usable.
     if (
-      url.hostname === "www.mesalim.com" ||
-      (url.hostname === "mesalim.com" && url.protocol === "http:")
+      url.hostname === "www.mesilim.org" ||
+      (url.hostname === "mesilim.org" && url.protocol === "http:")
     ) {
       return Response.redirect(`${COMPANY_ORIGIN}${url.pathname}${url.search}`, 301);
     }

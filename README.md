@@ -1,6 +1,6 @@
 # Welcome to your Lovable project
 
-This repository also contains the independently deployable [Mesalim company website](company/README.md). The default app and deployment remain the Trackdub product site.
+This repository also contains the independently deployable [Mesilim company website](company/README.md). The default app and deployment remain the Trackdub product site.
 
 This project was built with [Lovable](https://lovable.dev).
 

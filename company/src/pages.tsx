@@ -6,8 +6,8 @@ type Page = { path: string; title: string; description: string; element: ReactNo
 
 function Wordmark() {
   return (
-    <a className="wordmark" href={site.homeHref} aria-label="Mesalim home">
-      <img src="/brand/mesalim-wordmark.svg" alt="" width="2983" height="819" />
+    <a className="wordmark" href={site.homeHref} aria-label="Mesilim home">
+      <img src="/brand/mesilim-wordmark.svg" alt="" width="2983" height="819" />
     </a>
   );
 }
@@ -80,7 +80,7 @@ function Footer() {
         </nav>
       </div>
       <div className="footer-bottom">
-        <span>© {new Date().getUTCFullYear()} Mesalim LLC</span>
+        <span>© {new Date().getUTCFullYear()} Mesilim LLC</span>
         <a href={site.github}>
           Follow our work on GitHub <span aria-hidden="true">↗</span>
         </a>
@@ -109,7 +109,7 @@ function Button({
 function Breadcrumb({ label, project = false }: { label: string; project?: boolean }) {
   return (
     <nav className="breadcrumb wrap" aria-label="Breadcrumb">
-      <a href={site.homeHref}>Mesalim</a>
+      <a href={site.homeHref}>Mesilim</a>
       <span aria-hidden="true">/</span>
       {project && (
         <>
@@ -218,7 +218,7 @@ function Home() {
             Tools for creators and developers<span className="period">.</span>
           </h1>
           <p className="lead">
-            Mesalim builds tools for creative work and the systems behind it. Trackdub is our
+            Mesilim builds tools for creative work and the systems behind it. Trackdub is our
             flagship dubbing workstation. Our open source projects support inference, developer
             workflows, and agent memory.
           </p>
@@ -324,7 +324,7 @@ function Trackdub() {
               Join launch list
             </Button>
           </div>
-          <p className="product-attribution">A Mesalim product.</p>
+          <p className="product-attribution">A Mesilim product.</p>
         </div>
         <ProductImage priority />
       </section>
@@ -407,7 +407,7 @@ function OpenSource() {
           ))}
         </div>
         <p className="governance-note">
-          These projects are part of Mesalim’s open source portfolio. Their existing repository
+          These projects are part of Mesilim’s open source portfolio. Their existing repository
           governance, MIT licenses, and contributor rights remain with the respective projects.
         </p>
       </section>
@@ -537,10 +537,10 @@ function About() {
       <Breadcrumb label="About" />
       <section className="page-title about-title wrap">
         <h1>
-          Meet Mesalim<span className="period">.</span>
+          Meet Mesilim<span className="period">.</span>
         </h1>
         <p className="lead">
-          Mesalim LLC builds software for creative and developer workflows. Trackdub is our flagship
+          Mesilim LLC builds software for creative and developer workflows. Trackdub is our flagship
           video-dubbing product. Our open source work spans Linux inference, verified package
           distribution, and memory for coding agents.
         </p>
@@ -573,7 +573,7 @@ function About() {
           </div>
           <div className="feature-links">
             <a className="text-link" href={site.github}>
-              Mesalim on GitHub <span aria-hidden="true">↗</span>
+              Mesilim on GitHub <span aria-hidden="true">↗</span>
             </a>
             <a className="text-link" href="mailto:hello@trackdub.com">
               Trackdub product support <span aria-hidden="true">↗</span>
@@ -594,7 +594,7 @@ function Privacy() {
           Understand this website<span className="period">.</span>
         </h1>
         <p className="lead">
-          How the Mesalim company website handles information, separate from Trackdub’s product and
+          How the Mesilim company website handles information, separate from Trackdub’s product and
           launch-list services.
         </p>
       </section>
@@ -602,7 +602,7 @@ function Privacy() {
         <section>
           <h2>Company website</h2>
           <p>
-            This site presents Mesalim’s products and open source portfolio. It does not provide an
+            This site presents Mesilim’s products and open source portfolio. It does not provide an
             account, signup form, contact form, advertising, or added analytics tracking.
           </p>
         </section>
@@ -629,7 +629,7 @@ function Privacy() {
           <h2>Contact</h2>
           <p>
             For website privacy questions, use the existing shared legal contact at{" "}
-            <a href="mailto:legal@trackdub.com">legal@trackdub.com</a>. Include “Mesalim website” so
+            <a href="mailto:legal@trackdub.com">legal@trackdub.com</a>. Include “Mesilim website” so
             the scope is clear.
           </p>
         </section>
@@ -649,7 +649,7 @@ function NotFound() {
         This page is unavailable. Explore the company, find a project, or return to Trackdub.
       </p>
       <div className="actions">
-        <Button href={site.homeHref}>Mesalim home</Button>
+        <Button href={site.homeHref}>Mesilim home</Button>
         <Button href="/open-source" secondary>
           Open source
         </Button>
@@ -663,48 +663,48 @@ function NotFound() {
 export const pages: Page[] = [
   {
     path: "/",
-    title: "Mesalim · Tools for creators and developers",
+    title: "Mesilim · Tools for creators and developers",
     description: site.description,
     element: <Home />,
   },
   {
     path: "/products/trackdub",
-    title: "Trackdub · A Mesalim product",
+    title: "Trackdub · A Mesilim product",
     description:
-      "Meet Trackdub, Mesalim’s flagship desktop dubbing workstation for translating, voicing, and mixing video through an editable workflow.",
+      "Meet Trackdub, Mesilim’s flagship desktop dubbing workstation for translating, voicing, and mixing video through an editable workflow.",
     element: <Trackdub />,
   },
   {
     path: "/open-source",
-    title: "Open source · Mesalim",
+    title: "Open source · Mesilim",
     description:
-      "Explore Mesalim’s open source engineering: Linux ONNX inference, a signed Nushell package ecosystem, and measured Git-backed memory for coding agents.",
+      "Explore Mesilim’s open source engineering: Linux ONNX inference, a signed Nushell package ecosystem, and measured Git-backed memory for coding agents.",
     element: <OpenSource />,
   },
   ...projects.map((project) => ({
     path: `/open-source/${project.slug}`,
-    title: `${project.name} · Mesalim open source`,
+    title: `${project.name} · Mesilim open source`,
     description: project.summary,
     element: <ProjectDetail project={project} />,
   })),
   {
     path: "/about",
-    title: "About Mesalim",
+    title: "About Mesilim",
     description:
-      "Meet Mesalim LLC, the company behind Trackdub and open source engineering in Linux inference, package distribution, and AI agent memory.",
+      "Meet Mesilim LLC, the company behind Trackdub and open source engineering in Linux inference, package distribution, and AI agent memory.",
     element: <About />,
   },
   {
     path: "/privacy",
-    title: "Website privacy · Mesalim",
+    title: "Website privacy · Mesilim",
     description:
-      "Information about hosting, request data, external links, and privacy contacts for the Mesalim company website.",
+      "Information about hosting, request data, external links, and privacy contacts for the Mesilim company website.",
     element: <Privacy />,
   },
   {
     path: "/404",
-    title: "Page not found · Mesalim",
-    description: "Find your way back to Mesalim’s products and open source projects.",
+    title: "Page not found · Mesilim",
+    description: "Find your way back to Mesilim’s products and open source projects.",
     element: <NotFound />,
   },
 ];
@@ -737,8 +737,8 @@ export function CompanyDocument({
         <meta name="theme-color" content="#f6eddd" />
         <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
         <link rel="canonical" href={canonical} />
-        <link rel="icon" href="/brand/mesalim-favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/brand/mesalim-touch-icon.png" />
+        <link rel="icon" href="/brand/mesilim-favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/brand/mesilim-touch-icon.png" />
         <link rel="stylesheet" href="/company.css" />
         <link
           rel="preload"
@@ -762,7 +762,7 @@ export function CompanyDocument({
         <meta property="og:image" content={`${site.origin}/og.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Mesalim — tools for creators and developers" />
+        <meta property="og:image:alt" content="Mesilim — tools for creators and developers" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={page.title} />
         <meta name="twitter:description" content={page.description} />

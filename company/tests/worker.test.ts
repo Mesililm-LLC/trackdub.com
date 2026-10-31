@@ -19,12 +19,12 @@ describe("company host isolation and redirects", () => {
   test("www preserves deep path and query without redirecting into Trackdub", async () => {
     const env = environment();
     const response = await worker.fetch(
-      new Request("https://www.mesalim.com/open-source/numan?utm_source=test"),
+      new Request("https://www.mesilim.org/open-source/numan?utm_source=test"),
       env,
     );
     expect(response.status).toBe(301);
     expect(response.headers.get("location")).toBe(
-      "https://mesalim.com/open-source/numan?utm_source=test",
+      "https://mesilim.org/open-source/numan?utm_source=test",
     );
     expect(env.forwarded).toEqual([]);
   });
@@ -32,7 +32,7 @@ describe("company host isolation and redirects", () => {
   test("only known marketing aliases forward to equivalent product destinations", async () => {
     for (const path of ["/pricing", "/docs", "/guides", "/guides/ai-dubbing-guide", "/changelog"]) {
       const response = await worker.fetch(
-        new Request(`https://mesalim.com${path}/?utm_campaign=launch`),
+        new Request(`https://mesilim.org${path}/?utm_campaign=launch`),
         environment(),
       );
       expect(response.status).toBe(301);
@@ -54,7 +54,7 @@ describe("company host isolation and redirects", () => {
       "/.well-known/test",
       "/lovable/email/auth/webhook",
     ]) {
-      const response = await worker.fetch(new Request(`https://mesalim.com${path}`), env);
+      const response = await worker.fetch(new Request(`https://mesilim.org${path}`), env);
       expect(response.status).toBe(200);
       expect(response.headers.get("location")).toBeNull();
     }
@@ -63,7 +63,7 @@ describe("company host isolation and redirects", () => {
 
   test("legacy interest intent preserves query and reaches the existing product form", async () => {
     const response = await worker.fetch(
-      new Request("https://mesalim.com/?interest=pro&utm_source=old"),
+      new Request("https://mesilim.org/?interest=pro&utm_source=old"),
       environment(),
     );
     expect(response.status).toBe(302);
@@ -85,12 +85,12 @@ describe("company host isolation and redirects", () => {
   test("HEAD has no body and POST cannot reach an accidental form backend", async () => {
     const env = environment();
     const head = await worker.fetch(
-      new Request("https://mesalim.com/about", { method: "HEAD" }),
+      new Request("https://mesilim.org/about", { method: "HEAD" }),
       env,
     );
     expect(await head.text()).toBe("");
     const post = await worker.fetch(
-      new Request("https://mesalim.com/api/waitlist", { method: "POST" }),
+      new Request("https://mesilim.org/api/waitlist", { method: "POST" }),
       env,
     );
     expect(post.status).toBe(405);

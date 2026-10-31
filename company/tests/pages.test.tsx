@@ -12,9 +12,9 @@ describe("published company documents", () => {
       const html = renderToStaticMarkup(<CompanyDocument page={page} preview={false} />);
       expect(html.match(/<h1[ >]/g)).toHaveLength(1);
       expect(html.match(/<main[ >]/g)).toHaveLength(1);
-      expect(html).toContain(`rel="canonical" href="https://mesalim.com${page.path}"`);
-      expect(html).toContain('property="og:image" content="https://mesalim.com/og.png"');
-      expect(html).not.toMatch(/Mesilim|mesilim\.org|Build useful software|Leave the controls in/);
+      expect(html).toContain(`rel="canonical" href="https://mesilim.org${page.path}"`);
+      expect(html).toContain('property="og:image" content="https://mesilim.org/og.png"');
+      expect(html).not.toMatch(/Mesalim|mesalim\.com|Build useful software|Leave the controls in/);
       expect(html).not.toContain("<form");
       const indexable = page.path !== "/404";
       expect(html).toContain(`content="${indexable ? "index, follow" : "noindex, nofollow"}"`);
@@ -32,9 +32,9 @@ describe("published company documents", () => {
       expect(existsSync(resolve(built, file))).toBe(true);
       const html = readFileSync(resolve(built, file), "utf8");
       for (const match of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
-        const href = new URL(match[1].replaceAll("&amp;", "&"), "https://mesalim.com");
+        const href = new URL(match[1].replaceAll("&amp;", "&"), "https://mesilim.org");
         // Returning visitors may still have the former bare-root redirect cached.
-        if (href.pathname === "/") expect(href.searchParams.get("home")).toBe("mesalim");
+        if (href.pathname === "/") expect(href.searchParams.get("home")).toBe("mesilim");
         expect(paths.has(href.pathname) || existsSync(resolve(built, `.${href.pathname}`))).toBe(
           true,
         );
